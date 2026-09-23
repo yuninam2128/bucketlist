@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import categoryRule from '../assets/figma/category-rule.svg'
 import { useStore } from '../data/store'
 import type { BucketItem } from '../types'
+import { AddButton } from './AddButton'
 import styles from './BucketBoard.module.css'
 import { BucketItemRow } from './BucketItemRow'
 import { CompleteForm } from './CompleteForm'
@@ -52,9 +53,7 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
           })}
           {list.length === 0 && <li className={styles.empty}>아직 버킷리스트가 없어요</li>}
           <li>
-            <button type="button" className={styles.add} onClick={() => setAdding(true)}>
-              + 버킷리스트 추가
-            </button>
+            <AddButton label="버켓리스트 추가" className={styles.add} onClick={() => setAdding(true)} />
           </li>
         </ul>
       </section>

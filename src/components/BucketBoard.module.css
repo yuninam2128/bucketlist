@@ -66,15 +66,9 @@
   overscroll-behavior: contain;
 }
 
-/* 항목 줄과 같은 폭(281px)의 점선 버튼 */
+/* 항목 줄(281px) 가운데. 테이프 위아래 여백만큼 당겨 붙임 */
 .add {
-  width: 281px;
-  height: 36px;
-  margin-top: 4px;
-  font-size: 15px;
-  color: var(--text-muted);
-  border: 1px dashed var(--text-muted);
-  border-radius: 14px;
+  margin: -24px 0 -20px 56px;
 }
 
 .empty {

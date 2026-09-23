@@ -38,14 +38,9 @@
   white-space: nowrap;
 }
 
+/* 테이프 위아래 여백(약 30px)만큼 당겨 붙임 */
 .add {
-  display: block;
-  margin: 28px auto 8px;
-  padding: 8px 16px;
-  font-size: 17px;
-  color: var(--text-muted);
-  border: 1px dashed var(--text-muted);
-  border-radius: 14px;
+  margin: 0 auto -20px;
 }
 
 .count {

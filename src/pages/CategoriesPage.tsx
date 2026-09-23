@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { AddButton } from '../components/AddButton'
 import { CategoryForm } from '../components/CategoryForm'
 import { Folder } from '../components/Folder'
 import { useStore } from '../data/store'
@@ -39,9 +40,7 @@ export function CategoriesPage() {
         })}
       </ul>
 
-      <button type="button" className={styles.add} onClick={() => setAdding(true)}>
-        + 새 카테고리
-      </button>
+      <AddButton label="카테고리 추가" className={styles.add} onClick={() => setAdding(true)} />
 
       {adding && (
         <CategoryForm

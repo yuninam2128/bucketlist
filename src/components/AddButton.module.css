@@ -1,0 +1,40 @@
+/* Figma 75:711 — 169x112 박스 (테이프 위아래로 여백 포함, 실제 테이프는 y 30~80) */
+.button {
+  position: relative;
+  display: block;
+  width: 169px;
+  height: 112px;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.button:active {
+  transform: scale(0.95);
+}
+
+.tape {
+  position: absolute;
+  left: 0.85px;
+  top: 1.3px;
+  width: 167px;
+  height: 109px;
+  transform: rotate(0.9deg);
+  pointer-events: none;
+}
+
+.label {
+  position: absolute;
+  left: 26px;
+  top: 48px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.plus {
+  position: absolute;
+  left: 108px;
+  top: 31px;
+  width: 45px;
+  height: 45px;
+  pointer-events: none;
+}
