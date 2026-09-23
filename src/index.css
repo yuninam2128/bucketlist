@@ -6,6 +6,15 @@
   font-display: swap;
 }
 
+/* D+N 숫자 전용 */
+@font-face {
+  font-family: 'Cloudsofa namgim';
+  src: url('./assets/fonts/Cloudsofa_namgim-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
 :root {
   --text: #000;
   --text-muted: #767676;
