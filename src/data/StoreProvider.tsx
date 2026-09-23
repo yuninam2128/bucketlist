@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import type { Category, DiaryEntry } from '../types'
+import type { Author, Category, DiaryEntry } from '../types'
 import { mockCategories, mockCouple, mockDiaries, mockItems } from './mock'
 import { StoreContext, type Completion, type NewCategory, type NewItem, type Store } from './store'
 
 // 임시 id (Supabase 연결 후엔 DB가 발급). randomUUID는 http 폰 테스트에서 안 돼서 사용 안 함
 const tempId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`
+
+// TODO: 로그인 붙이면 로그인한 사람으로
+const currentUser: Author = 'me'
 
 // 지금은 메모리 목업. Supabase 연결 시 이 파일만 교체하면 화면은 그대로 동작
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -15,19 +18,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const completeItem = useCallback((id: string, { date, photos, note }: Completion) => {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, done: true, date } : it)))
     if (photos.length === 0 && !note) return
-    // TODO: 로그인 붙이면 실제 작성자로
     const entry: DiaryEntry = {
       id: tempId(),
       date,
       bucketItemId: id,
       photos,
-      notes: note ? [{ author: 'me', text: note }] : [],
+      notes: note ? [{ author: currentUser, text: note }] : [],
     }
     setDiaries((prev) => [...prev, entry])
   }, [])
 
   const uncompleteItem = useCallback((id: string) => {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, done: false } : it)))
+  }, [])
+
+  const saveNote = useCallback((diaryId: string, text: string) => {
+    const trimmed = text.trim()
+    setDiaries((prev) =>
+      prev.map((d) => {
+        if (d.id !== diaryId) return d
+        const others = d.notes.filter((n) => n.author !== currentUser)
+        const mine = d.notes.find((n) => n.author === currentUser)
+        if (!trimmed) return { ...d, notes: others }
+        // 이미 쓴 한마디는 제자리에서 수정, 처음이면 뒤에 추가
+        const notes = mine
+          ? d.notes.map((n) => (n.author === currentUser ? { ...n, text: trimmed } : n))
+          : [...d.notes, { author: currentUser, text: trimmed }]
+        return { ...d, notes }
+      }),
+    )
   }, [])
 
   const addCategory = useCallback((input: NewCategory) => {
@@ -37,21 +56,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addItem = useCallback((input: NewItem) => {
-    setItems((prev) => [...prev, { id: tempId(), done: false, author: 'me', ...input }])
+    setItems((prev) => [...prev, { id: tempId(), done: false, author: currentUser, ...input }])
   }, [])
 
   const store = useMemo<Store>(
     () => ({
+      currentUser,
       couple: mockCouple,
       categories,
       items,
       diaries,
       completeItem,
       uncompleteItem,
+      saveNote,
       addCategory,
       addItem,
     }),
-    [categories, items, diaries, completeItem, uncompleteItem, addCategory, addItem],
+    [categories, items, diaries, completeItem, uncompleteItem, saveNote, addCategory, addItem],
   )
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>

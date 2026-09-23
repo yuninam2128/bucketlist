@@ -8,6 +8,12 @@
   border: 1px solid #000;
   box-shadow: var(--shadow);
   scroll-margin-top: 24px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.card:active {
+  transform: scale(0.98);
 }
 
 /* 마스킹 테이프 */
@@ -107,6 +113,13 @@
   white-space: pre-line;
   word-break: keep-all;
   line-height: 1.25;
+}
+
+.addNote {
+  padding: 4px 7px;
+  color: var(--text-muted);
+  border: 1px dashed var(--text-muted);
+  border-radius: 11px;
 }
 
 .date {

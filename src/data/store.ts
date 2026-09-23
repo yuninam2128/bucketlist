@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { BucketItem, Category, CategoryColor, Couple, DiaryEntry } from '../types'
+import type { Author, BucketItem, Category, CategoryColor, Couple, DiaryEntry } from '../types'
 
 export interface NewCategory {
   title: string
@@ -22,6 +22,8 @@ export interface Completion {
 }
 
 export interface Store {
+  /** 지금 앱을 쓰는 사람 (로그인 붙이기 전까진 'me' 고정) */
+  currentUser: Author
   couple: Couple
   categories: Category[]
   items: BucketItem[]
@@ -30,6 +32,8 @@ export interface Store {
   completeItem: (id: string, completion: Completion) => void
   /** 완료 취소 (남긴 기록은 유지) */
   uncompleteItem: (id: string) => void
+  /** 기록에 내 한마디 남기기/수정 (빈 문자열이면 삭제) */
+  saveNote: (diaryId: string, text: string) => void
   addCategory: (input: NewCategory) => Category
   addItem: (input: NewItem) => void
 }

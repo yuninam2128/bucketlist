@@ -2,11 +2,14 @@ import { useMemo, useState } from 'react'
 import { DdayCard } from '../components/DdayCard'
 import { DiaryCard } from '../components/DiaryCard'
 import { MonthCalendar } from '../components/MonthCalendar'
+import { NoteForm } from '../components/NoteForm'
 import { useStore } from '../data/store'
 import styles from './CalendarPage.module.css'
 
 export function CalendarPage() {
-  const { diaries } = useStore()
+  const { diaries, saveNote } = useStore()
+  const [noteFor, setNoteFor] = useState<string | null>(null)
+  const noteEntry = diaries.find((d) => d.id === noteFor)
   const [view, setView] = useState(() => {
     const now = new Date()
     return { year: now.getFullYear(), month: now.getMonth() }
@@ -50,10 +53,21 @@ export function CalendarPage() {
 
       <div className={styles.diaries}>
         {monthEntries.map((entry) => (
-          <DiaryCard key={entry.id} entry={entry} />
+          <DiaryCard key={entry.id} entry={entry} onOpen={() => setNoteFor(entry.id)} />
         ))}
         {monthEntries.length === 0 && <p className={styles.empty}>이 달의 기록이 아직 없어요</p>}
       </div>
+
+      {noteEntry && (
+        <NoteForm
+          entry={noteEntry}
+          onCancel={() => setNoteFor(null)}
+          onSubmit={(text) => {
+            saveNote(noteEntry.id, text)
+            setNoteFor(null)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -1,0 +1,22 @@
+.itemTitle {
+  margin: -8px 0 18px;
+  font-size: 15px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.other {
+  margin-bottom: 16px;
+}
+
+.otherText {
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.hint {
+  margin-top: -8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
