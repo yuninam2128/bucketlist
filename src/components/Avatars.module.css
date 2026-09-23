@@ -1,0 +1,26 @@
+/* svg에 그림자 여백이 포함돼 51x51 (원은 43x43) */
+.avatars {
+  position: absolute;
+  top: calc(23px + env(safe-area-inset-top, 0px));
+  right: 24px;
+  width: 72px;
+  height: 68px;
+  z-index: 20;
+}
+
+.me,
+.partner {
+  position: absolute;
+  width: 51px;
+  height: 51px;
+}
+
+.me {
+  top: 0;
+  left: 0;
+}
+
+.partner {
+  top: 17px;
+  right: 0;
+}

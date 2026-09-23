@@ -1,0 +1,13 @@
+.app {
+  position: relative;
+  width: 100%;
+  max-width: var(--app-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow-x: clip;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.main {
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
+}

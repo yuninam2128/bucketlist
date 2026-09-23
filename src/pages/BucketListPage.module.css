@@ -1,0 +1,161 @@
+/* 좌표는 Figma 45:2 기준. 종이(346px)의 왼쪽 위를 원점으로 둠 */
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - var(--tabbar-height) - env(safe-area-inset-bottom, 0px)
+  );
+  min-height: 520px;
+}
+
+.back {
+  position: absolute;
+  left: 13px;
+  top: 23px;
+  width: 42px;
+  height: 54px;
+  z-index: 10;
+}
+
+.back img,
+.prev img,
+.next img {
+  width: 100%;
+  height: 100%;
+}
+
+.paper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 346px;
+  margin: 133px auto 0;
+  border: 1px solid #000;
+}
+
+/* D+N 카드 */
+.ddayCard {
+  position: absolute;
+  left: 71px;
+  top: -58px;
+  width: 200px;
+  height: 120px;
+  background: #fff;
+  border: 1px solid #000;
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+
+.ddayEllipse {
+  position: absolute;
+  left: 17px;
+  top: 15px;
+  width: 163px;
+  height: 89px;
+}
+
+.dday {
+  position: absolute;
+  left: 17px;
+  top: 15px;
+  width: 163px;
+  height: 89px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* TODO: Figma 폰트(Cloudsofa namgim) 파일을 받으면 교체 */
+  font-family: 'Cloudsofa namgim', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  font-weight: 900;
+  color: var(--dday-pink);
+  -webkit-text-stroke: 2px #000;
+  paint-order: stroke fill;
+  line-height: 1;
+}
+
+.ddayD {
+  font-size: 50px;
+}
+
+.ddayPlus {
+  font-size: 30px;
+}
+
+.ddayNum {
+  font-size: 48px;
+}
+
+/* 카테고리 스티커 */
+.sticky {
+  position: absolute;
+  left: 258px;
+  top: -25px;
+  width: 69px;
+  height: 118px;
+  padding: 9px 0 0 8px;
+  background: var(--sticky-green);
+  border-radius: 2px;
+  z-index: 2;
+}
+
+.stickyLabel {
+  font-size: 11px;
+}
+
+.stickyRule {
+  width: 32px;
+  height: 1px;
+  margin: 1px 0 21px 1px;
+}
+
+.stickyTitle {
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 항목 목록: 종이 안에서 스크롤 */
+.items {
+  position: absolute;
+  inset: 123px 0 0;
+  margin: 0;
+  padding: 0 0 16px 26px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.empty {
+  padding-top: 8px;
+  font-size: 17px;
+  color: var(--text-muted);
+}
+
+/* 이전/다음 카테고리 화살표: 종이 세로 중앙 */
+.prev,
+.next {
+  position: absolute;
+  top: calc(133px + (100% - 133px) / 2);
+  z-index: 10;
+  transition: transform 0.15s;
+}
+
+.prev {
+  left: -5px;
+  width: 73px;
+  height: 94px;
+  margin-top: -54px;
+}
+
+.next {
+  right: -12px;
+  width: 95px;
+  height: 96px;
+  margin-top: -60px;
+}
+
+.prev:active,
+.next:active {
+  transform: scale(0.92);
+}
