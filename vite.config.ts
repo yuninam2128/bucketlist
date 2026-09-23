@@ -24,7 +24,7 @@ export default defineConfig({
         background_color: '#ffffff',
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff,ttf,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff,ttf}'],
       },
       devOptions: {
         enabled: true,

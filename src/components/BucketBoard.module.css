@@ -1,0 +1,73 @@
+/* 좌표는 Figma 45:2 기준. 종이(346px)의 왼쪽 위를 원점으로 둠 */
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - var(--tabbar-height) - env(safe-area-inset-bottom, 0px)
+  );
+  min-height: 520px;
+}
+
+.paper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 346px;
+  margin: 133px auto 0;
+  border: 1px solid #000;
+}
+
+/* D+N 카드 */
+.ddayCard {
+  position: absolute;
+  left: 71px;
+  top: -58px;
+  z-index: 1;
+}
+
+/* 카테고리 스티커 */
+.sticky {
+  position: absolute;
+  left: 258px;
+  top: -25px;
+  width: 69px;
+  height: 118px;
+  padding: 9px 0 0 8px;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+.stickyLabel {
+  font-size: 11px;
+}
+
+.stickyRule {
+  width: 32px;
+  height: 1px;
+  margin: 1px 0 21px 1px;
+}
+
+.stickyTitle {
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 항목 목록: 종이 안에서 스크롤 */
+.items {
+  position: absolute;
+  inset: 123px 0 0;
+  margin: 0;
+  padding: 0 0 16px 26px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.empty {
+  padding-top: 8px;
+  font-size: 17px;
+  color: var(--text-muted);
+}
