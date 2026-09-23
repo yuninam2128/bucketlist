@@ -12,7 +12,6 @@
   top: 18px;
   width: 144px;
   height: 123px;
-  background: var(--folder);
   border: 1px solid #000;
   border-radius: 14px;
 }
@@ -23,6 +22,7 @@
   top: 25px;
   width: 163px;
   height: 116px;
+  overflow: visible;
 }
 
 .photo {

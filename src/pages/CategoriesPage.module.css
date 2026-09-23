@@ -38,6 +38,16 @@
   white-space: nowrap;
 }
 
+.add {
+  display: block;
+  margin: 28px auto 8px;
+  padding: 8px 16px;
+  font-size: 17px;
+  color: var(--text-muted);
+  border: 1px dashed var(--text-muted);
+  border-radius: 14px;
+}
+
 .count {
   font-size: 17px;
   white-space: nowrap;

@@ -30,12 +30,13 @@ export const mockCategories: Category[] = [
   {
     id: 'movie',
     title: '영화',
+    color: 'green',
     description: '뭐볼까',
     coverPhotos: [samplePhoto, samplePhoto, samplePhoto],
   },
-  { id: 'travel', title: '여행', description: '어디갈까', coverPhotos: [] },
-  { id: 'food', title: '맛집', description: '뭐먹을까', coverPhotos: [] },
-  { id: 'etc', title: '해보고 싶은 것', coverPhotos: [] },
+  { id: 'travel', title: '여행', color: 'blue', description: '어디갈까', coverPhotos: [] },
+  { id: 'food', title: '맛집', color: 'pink', description: '뭐먹을까', coverPhotos: [] },
+  { id: 'etc', title: '해보고 싶은 것', color: 'beige', coverPhotos: [] },
 ]
 
 const titles = ['인터스텔라 재개봉 보기', '심야영화 보기', '자동차 극장 가기', '영화제 가기', '팝콘 직접 만들기']
@@ -47,7 +48,6 @@ export const mockItems: BucketItem[] = [
     title,
     done: i >= 3,
     date: '2026-12-25',
-    tag: i % 2 === 0 ? '같이' : '데이트',
     author: (i % 2 === 0 ? 'me' : 'partner') as BucketItem['author'],
   })),
   { id: 'travel-0', categoryId: 'travel', title: '제주도 한달살기', done: false, author: 'me' },

@@ -2,9 +2,13 @@
 
 export type Author = 'me' | 'partner'
 
+/** Figma 카테고리 컴포넌트(64:592 배지, 64:605 폴더)의 6가지 색 */
+export type CategoryColor = 'beige' | 'green' | 'pink' | 'purple' | 'blue' | 'rose'
+
 export interface Category {
   id: string
   title: string
+  color: CategoryColor
   /** 카테고리 스티커에 제목 아래로 들어가는 짧은 설명 (예: "뭐볼까") */
   description?: string
   /** 폴더에서 삐져나오는 대표 사진 (최대 3장 표시) */
@@ -18,8 +22,6 @@ export interface BucketItem {
   done: boolean
   /** 목표일 또는 완료일 (YYYY-MM-DD) */
   date?: string
-  /** 항목 옆 회색 태그 */
-  tag?: string
   author: Author
 }
 

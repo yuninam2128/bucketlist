@@ -1,16 +1,17 @@
 import check from '../assets/figma/check.svg'
 import rowLine from '../assets/figma/item-row.svg'
-import tagBg from '../assets/figma/tag.svg'
 import { formatMonthDay } from '../lib/date'
-import type { BucketItem } from '../types'
+import type { BucketItem, Category } from '../types'
 import styles from './BucketItemRow.module.css'
+import { CategoryBadge } from './CategoryBadge'
 
 interface Props {
   item: BucketItem
+  category: Category
   onToggle: (id: string) => void
 }
 
-export function BucketItemRow({ item, onToggle }: Props) {
+export function BucketItemRow({ item, category, onToggle }: Props) {
   return (
     <li className={`${styles.row} ${item.done ? styles.done : ''}`}>
       <img className={styles.line} src={rowLine} alt="" />
@@ -24,12 +25,7 @@ export function BucketItemRow({ item, onToggle }: Props) {
         {item.done && <img className={styles.check} src={check} alt="" />}
       </button>
       <p className={styles.title}>{item.title}</p>
-      {item.tag && (
-        <span className={styles.tag}>
-          <img src={tagBg} alt="" />
-          <span>{item.tag}</span>
-        </span>
-      )}
+      <CategoryBadge category={category} className={styles.badge} />
       {item.date && <p className={styles.date}>{formatMonthDay(item.date)}</p>}
     </li>
   )

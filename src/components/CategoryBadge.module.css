@@ -1,0 +1,27 @@
+/* 67x20 박스, 글자는 왼쪽 16% 지점부터 */
+.badge {
+  position: relative;
+  display: inline-block;
+  width: 67px;
+  height: 20px;
+  padding: 4px 6px 0 11px;
+  font-size: 12px;
+  line-height: 1.1;
+  white-space: nowrap;
+  transform: rotate(-0.23deg);
+}
+
+.shape {
+  position: absolute;
+  top: 0;
+  left: 0.75px;
+  width: 65.95px;
+  height: 20.06px;
+}
+
+.label {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

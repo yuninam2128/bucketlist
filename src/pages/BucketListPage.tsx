@@ -5,6 +5,7 @@ import categoryRule from '../assets/figma/category-rule.svg'
 import { BucketItemRow } from '../components/BucketItemRow'
 import { DdayCard } from '../components/DdayCard'
 import { useStore } from '../data/store'
+import { CATEGORY_COLORS } from '../lib/categoryColors'
 import styles from './BucketListPage.module.css'
 
 export function BucketListPage() {
@@ -32,7 +33,7 @@ export function BucketListPage() {
       <section className={styles.paper}>
         <DdayCard className={styles.ddayCard} />
 
-        <div className={styles.sticky}>
+        <div className={styles.sticky} style={{ background: CATEGORY_COLORS[category.color] }}>
           <p className={styles.stickyLabel}>CATEGORY</p>
           <img className={styles.stickyRule} src={categoryRule} alt="" />
           <p className={styles.stickyTitle}>{category.title}</p>
@@ -41,7 +42,7 @@ export function BucketListPage() {
 
         <ul className={styles.items}>
           {list.map((item) => (
-            <BucketItemRow key={item.id} item={item} onToggle={toggleItem} />
+            <BucketItemRow key={item.id} item={item} category={category} onToggle={toggleItem} />
           ))}
           {list.length === 0 && <li className={styles.empty}>아직 버킷리스트가 없어요</li>}
         </ul>
