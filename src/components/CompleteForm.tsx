@@ -16,7 +16,7 @@ type Photo = LocalPhoto
 interface StickerJob {
   /** 어떤 사진으로 만든 스티커인지 (대표 사진이 바뀌면 새로 만듦) */
   photoUrl: string
-  job: Promise<string>
+  job: Promise<Blob>
 }
 
 interface Props {
@@ -91,7 +91,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       onSubmit={() =>
         onSubmit({
           date,
-          photos: photos.map((p) => p.url),
+          photos,
           note: note.trim() || undefined,
           stickerJob: sticker.current?.job,
         })

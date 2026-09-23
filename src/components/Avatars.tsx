@@ -1,12 +1,29 @@
+import { useState } from 'react'
 import avatar from '../assets/figma/avatar.svg'
+import { useStore } from '../data/store'
 import styles from './Avatars.module.css'
+import { ProfileForm } from './ProfileForm'
 
-// 우측 상단 두 사람 프로필 (나중에 프로필 사진으로 교체)
+// 우측 상단 두 사람 프로필. 누르면 프로필 팝업
 export function Avatars() {
+  const { couple } = useStore()
+  const [open, setOpen] = useState(false)
+
   return (
-    <div className={styles.avatars} aria-hidden>
-      <img className={styles.me} src={avatar} alt="" />
-      <img className={styles.partner} src={avatar} alt="" />
-    </div>
+    <>
+      <button type="button" className={styles.avatars} onClick={() => setOpen(true)} aria-label="프로필">
+        <span className={`${styles.circle} ${styles.me}`}>
+          <img className={styles.frame} src={avatar} alt="" />
+          {couple.avatars.me && <img className={styles.photo} src={couple.avatars.me} alt="" />}
+        </span>
+        <span className={`${styles.circle} ${styles.partner}`}>
+          <img className={styles.frame} src={avatar} alt="" />
+          {couple.avatars.partner && <img className={styles.photo} src={couple.avatars.partner} alt="" />}
+          {/* 짝꿍이 아직 안 들어왔으면 초대하라는 표시 */}
+          {!couple.partnerJoined && <span className={styles.invite}>+</span>}
+        </span>
+      </button>
+      {open && <ProfileForm onClose={() => setOpen(false)} />}
+    </>
   )
 }

@@ -56,11 +56,7 @@ export function MemoryPage() {
       const photos = await loadPhotos(files)
       // 첫 사진이 생기는 순간이면 캘린더 스티커도 만들기
       const job = entry.photos.length === 0 && !entry.sticker ? stickerJobFor(photos[0].blob) : undefined
-      addPhotos(
-        entry.id,
-        photos.map((p) => p.url),
-        job,
-      )
+      await addPhotos(entry.id, photos, job)
     } finally {
       setUploading(false)
     }

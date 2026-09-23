@@ -27,6 +27,12 @@ export interface Couple {
   startDate: string
   /** 일기 메모에 붙는 각자 닉네임 */
   names: Record<Author, string>
+  /** 프로필 사진 URL */
+  avatars: Partial<Record<Author, string>>
+  /** 짝꿍에게 알려줄 초대코드 */
+  inviteCode: string
+  /** 짝꿍이 초대코드로 들어왔는지 */
+  partnerJoined: boolean
 }
 
 /** 추억: 버킷리스트를 완료하며 남긴 사진 여러 장 + 각자 한마디. 캘린더에 표시 */

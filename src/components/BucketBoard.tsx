@@ -49,9 +49,9 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
   const photos = memories.flatMap((d) => d.photos.map((src, index) => ({ src, memoryId: d.id, index })))
 
   // 완료했지만 기록이 없던 항목이면 빈 추억을 만들어서라도 열어줌 (사진은 거기서 추가)
-  const openMemory = (itemId: string) => {
+  const openMemory = async (itemId: string) => {
     const memory = memories.find((d) => d.bucketItemId === itemId)
-    navigate(`/memories/${memory?.id ?? startMemory(itemId)}`)
+    navigate(`/memories/${memory?.id ?? (await startMemory(itemId))}`)
   }
 
   return (

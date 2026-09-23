@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import type { LocalPhoto } from '../lib/photos'
 import type { Author, BucketItem, Category, Couple, DiaryEntry } from '../types'
 
 export interface NewCategory {
@@ -15,35 +16,68 @@ export interface NewItem {
 export interface Completion {
   /** 완료한 날 (YYYY-MM-DD) */
   date: string
-  /** 사진 URL (최대 2장) */
-  photos: string[]
+  /** 고른 사진 (미리보기 URL + 올릴 원본) */
+  photos: LocalPhoto[]
   note?: string
   /** 대표 사진 누끼 작업 (오래 걸려서 완료 후에도 백그라운드로 계속) */
-  stickerJob?: Promise<string>
+  stickerJob?: Promise<Blob>
 }
 
+export interface ProfileInput {
+  nickname?: string
+  /** 새 프로필 사진 (정사각형으로 줄인 것) */
+  avatar?: Blob
+}
+
+/**
+ * - loading: 세션/데이터 불러오는 중
+ * - signedOut: 로그인 화면
+ * - noCouple: 로그인은 했는데 아직 커플 연결 전 (만들기 / 초대코드로 들어가기)
+ * - ready: 앱 사용
+ * - error: 데이터를 못 불러옴 (DB 설정 전, 인터넷 끊김 등)
+ */
+export type AuthStatus = 'loading' | 'signedOut' | 'noCouple' | 'ready' | 'error'
+
 export interface Store {
-  /** 지금 앱을 쓰는 사람 (로그인 붙이기 전까진 'me' 고정) */
+  status: AuthStatus
+  loadError?: string
+  /** 불러오기 다시 시도 */
+  retry: () => void
+  /** 로그인한 이메일 */
+  email?: string
+
+  // ---- 로그인 / 커플 연결 ----
+  sendCode: (email: string) => Promise<void>
+  verifyCode: (email: string, code: string) => Promise<void>
+  createCouple: (nickname: string, startDate: string) => Promise<void>
+  joinCouple: (inviteCode: string, nickname: string) => Promise<void>
+  signOut: () => Promise<void>
+
+  // ---- 데이터 ----
+  /** 지금 앱을 쓰는 사람은 항상 'me', 짝꿍은 'partner' */
   currentUser: Author
   couple: Couple
   categories: Category[]
   items: BucketItem[]
   diaries: DiaryEntry[]
-  /** 완료 처리 + 사진/소감이 있으면 그 날짜의 캘린더 기록으로 저장 (누끼는 준비되면 자동으로 붙음) */
-  completeItem: (id: string, completion: Completion) => void
-  /** 완료 취소 (남긴 기록은 유지) */
-  uncompleteItem: (id: string) => void
-  /** 기록에 내 한마디 남기기/수정 (빈 문자열이면 삭제) */
-  saveNote: (diaryId: string, text: string) => void
+
+  /** 완료 처리 + 사진/소감이 있으면 그 날짜의 추억으로 저장 (누끼는 준비되면 자동으로 붙음) */
+  completeItem: (id: string, completion: Completion) => Promise<void>
+  /** 완료 취소 (남긴 추억은 유지) */
+  uncompleteItem: (id: string) => Promise<void>
+  /** 추억에 내 한마디 남기기/수정 (빈 문자열이면 삭제) */
+  saveNote: (diaryId: string, text: string) => Promise<void>
   /** 추억에 사진 더하기 (첫 사진이면 누끼 스티커도) */
-  addPhotos: (diaryId: string, photos: string[], stickerJob?: Promise<string>) => void
+  addPhotos: (diaryId: string, photos: LocalPhoto[], stickerJob?: Promise<Blob>) => Promise<void>
   /** 기록 없이 완료한 항목에 빈 추억 만들기 → 추억 id */
-  startMemory: (itemId: string) => string
-  addCategory: (input: NewCategory) => Category
-  addItem: (input: NewItem) => void
-  updateItem: (id: string, input: NewItem) => void
-  /** 항목 삭제 — 그 항목으로 남긴 추억도 같이 지움 */
-  deleteItem: (id: string) => void
+  startMemory: (itemId: string) => Promise<string>
+  addCategory: (input: NewCategory) => Promise<void>
+  addItem: (input: NewItem) => Promise<void>
+  updateItem: (id: string, input: NewItem) => Promise<void>
+  /** 항목 삭제 — 그 항목으로 남긴 추억(사진 포함)도 같이 지움 */
+  deleteItem: (id: string) => Promise<void>
+  updateProfile: (input: ProfileInput) => Promise<void>
+  updateStartDate: (date: string) => Promise<void>
 }
 
 export const StoreContext = createContext<Store | null>(null)

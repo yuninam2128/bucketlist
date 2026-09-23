@@ -1,0 +1,8 @@
+.splash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  font-size: 22px;
+  color: var(--text-muted);
+}
