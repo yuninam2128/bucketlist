@@ -16,7 +16,6 @@ export default function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/:categoryId" element={<BucketListPage />} />
             <Route path="calendar" element={<CalendarPage />} />
-            {/* TODO: 추가 화면 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

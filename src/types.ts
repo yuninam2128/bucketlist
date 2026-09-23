@@ -20,7 +20,7 @@ export interface BucketItem {
   categoryId: string
   title: string
   done: boolean
-  /** 목표일 또는 완료일 (YYYY-MM-DD) */
+  /** 목표일, 완료하면 완료일 (YYYY-MM-DD) */
   date?: string
   author: Author
 }
@@ -32,11 +32,13 @@ export interface Couple {
   names: Record<Author, string>
 }
 
-/** 캘린더 하루 기록: 사진 최대 2장 + 각자 한마디 */
+/** 캘린더 하루 기록: 사진 최대 2장 + 각자 한마디. 버킷리스트를 완료하며 남김 */
 export interface DiaryEntry {
   id: string
   /** YYYY-MM-DD */
   date: string
+  /** 이 기록을 남긴 완료 항목 */
+  bucketItemId?: string
   photos: string[]
   notes: { author: Author; text: string }[]
 }

@@ -31,7 +31,7 @@ export function CalendarPage() {
 
   const selectDate = (ymd: string) => {
     setSelected(ymd)
-    document.getElementById(`diary-${ymd}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.querySelector(`[data-date="${ymd}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (

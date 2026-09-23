@@ -113,6 +113,14 @@
   position: absolute;
   right: 10px;
   bottom: 8px;
+  max-width: 320px;
   font-size: 10px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemTitle {
+  color: var(--text);
 }

@@ -66,6 +66,17 @@
   overscroll-behavior: contain;
 }
 
+/* 항목 줄과 같은 폭(281px)의 점선 버튼 */
+.add {
+  width: 281px;
+  height: 36px;
+  margin-top: 4px;
+  font-size: 15px;
+  color: var(--text-muted);
+  border: 1px dashed var(--text-muted);
+  border-radius: 14px;
+}
+
 .empty {
   padding-top: 8px;
   font-size: 17px;

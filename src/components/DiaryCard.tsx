@@ -15,11 +15,13 @@ const arrows = [
 
 // 사진 2장 + 각자 한마디가 화살표로 이어지는 하루 기록 카드
 export function DiaryCard({ entry }: { entry: DiaryEntry }) {
-  const { couple } = useStore()
+  const { couple, items } = useStore()
   const notes = entry.notes.slice(0, 2)
+  const item = entry.bucketItemId ? items.find((it) => it.id === entry.bucketItemId) : undefined
 
   return (
-    <article id={`diary-${entry.date}`} className={styles.card}>
+    // 같은 날 기록이 여러 개일 수 있어 id 대신 data-date (캘린더에서 날짜 탭 시 스크롤 대상)
+    <article data-date={entry.date} className={styles.card}>
       <div className={styles.tape} aria-hidden />
 
       {entry.photos.slice(0, 2).map((src, i) => (
@@ -41,7 +43,10 @@ export function DiaryCard({ entry }: { entry: DiaryEntry }) {
         </div>
       ))}
 
-      <p className={styles.date}>{formatMonthDay(entry.date)}</p>
+      <p className={styles.date}>
+        {item && <span className={styles.itemTitle}>✓ {item.title} · </span>}
+        {formatMonthDay(entry.date)}
+      </p>
     </article>
   )
 }

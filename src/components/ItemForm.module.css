@@ -1,0 +1,24 @@
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+}
+
+.categories legend {
+  padding: 0;
+}
+
+/* 선택된 배지만 또렷하게 */
+.chip {
+  padding: 3px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  opacity: 0.5;
+}
+
+.selected {
+  border-color: #000;
+  opacity: 1;
+}

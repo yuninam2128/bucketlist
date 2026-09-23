@@ -1,0 +1,55 @@
+<svg width="116" height="65" viewBox="69.5 0 116 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Vector 31" d="M76.9688 43.2261L70.8701 35.7686C69.9744 34.6733 70.4681 33.0196 71.8177 32.5948L172.934 0.761785C174.168 0.373407 175.441 1.24046 175.53 2.5307L176.219 12.4357C176.237 12.6922 176.304 12.9428 176.417 13.1738L184.095 28.9129C184.631 30.0118 184.065 31.3303 182.898 31.6975L80.667 63.8813C79.6134 64.213 78.4904 63.6278 78.1587 62.5742L76.0423 55.8514C75.9529 55.5676 75.928 55.2675 75.9694 54.9729L77.4012 44.7701C77.4787 44.2177 77.322 43.6579 76.9688 43.2261Z" fill="#DACDB0"/>
+<g id="Mask group">
+<mask id="mask0_0_55" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="70" y="0" width="115" height="64">
+<path id="Vector 30" d="M76.9688 43.226L70.8701 35.7685C69.9744 34.6732 70.4681 33.0196 71.8177 32.5947L172.934 0.761762C174.168 0.373384 175.441 1.24043 175.53 2.53068L176.219 12.4357C176.237 12.6921 176.304 12.9428 176.417 13.1738L184.095 28.9129C184.631 30.0118 184.065 31.3303 182.898 31.6975L80.667 63.8813C79.6134 64.213 78.4904 63.6278 78.1587 62.5742L76.0423 55.8514C75.9529 55.5676 75.928 55.2674 75.9694 54.9728L77.4012 44.7701C77.4787 44.2176 77.322 43.6579 76.9688 43.226Z" fill="#DACDB0"/>
+</mask>
+<g mask="url(#mask0_0_55)">
+<g id="Group 19">
+<line id="Line 1" x1="75.25" y1="-35" x2="75.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 2" x1="80.25" y1="-35" x2="80.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 24" x1="208" y1="-29.75" x2="52" y2="-29.75" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 3" x1="85.25" y1="-35" x2="85.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 25" x1="208" y1="-24.75" x2="52" y2="-24.75" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 4" x1="90.25" y1="-35" x2="90.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 26" x1="208" y1="-19.75" x2="52" y2="-19.75" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 5" x1="95.25" y1="-35" x2="95.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 27" x1="208" y1="-14.75" x2="52" y2="-14.75" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 6" x1="100.25" y1="-35" x2="100.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 28" x1="208" y1="-9.75002" x2="52" y2="-9.75004" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 7" x1="105.25" y1="-35" x2="105.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 29" x1="208" y1="-4.75002" x2="52" y2="-4.75004" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 8" x1="110.25" y1="-35" x2="110.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 30" x1="208" y1="0.249977" x2="52" y2="0.249963" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 9" x1="115.25" y1="-35" x2="115.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 31" x1="208" y1="5.24998" x2="52" y2="5.24996" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 10" x1="120.25" y1="-35" x2="120.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 32" x1="208" y1="10.25" x2="52" y2="10.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 11" x1="125.25" y1="-35" x2="125.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 33" x1="208" y1="15.25" x2="52" y2="15.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 12" x1="130.25" y1="-35" x2="130.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 34" x1="208" y1="20.25" x2="52" y2="20.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 13" x1="135.25" y1="-35" x2="135.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 35" x1="208" y1="25.25" x2="52" y2="25.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 14" x1="140.25" y1="-35" x2="140.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 36" x1="208" y1="30.25" x2="52" y2="30.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 15" x1="145.25" y1="-35" x2="145.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 37" x1="208" y1="35.25" x2="52" y2="35.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 16" x1="150.25" y1="-35" x2="150.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 38" x1="208" y1="40.25" x2="52" y2="40.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 17" x1="155.25" y1="-35" x2="155.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 39" x1="208" y1="45.25" x2="52" y2="45.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 18" x1="160.25" y1="-35" x2="160.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 40" x1="208" y1="50.25" x2="52" y2="50.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 19" x1="165.25" y1="-35" x2="165.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 41" x1="208" y1="55.25" x2="52" y2="55.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 20" x1="170.25" y1="-35" x2="170.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 42" x1="208" y1="60.25" x2="52" y2="60.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 21" x1="175.25" y1="-35" x2="175.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 43" x1="208" y1="65.25" x2="52" y2="65.25" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 22" x1="180.25" y1="-35" x2="180.25" y2="121" stroke="#7C7C7C" stroke-width="0.5"/>
+<line id="Line 44" x1="208" y1="70.25" x2="52" y2="70.25" stroke="#7C7C7C" stroke-width="0.5"/>
+</g>
+</g>
+</g>
+</svg>

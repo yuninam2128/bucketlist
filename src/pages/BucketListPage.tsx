@@ -21,6 +21,7 @@ export function BucketListPage() {
   return (
     <BucketBoard
       items={items.filter((it) => it.categoryId === category.id)}
+      defaultCategoryId={category.id}
       sticky={{ title: category.title, description: category.description, color: CATEGORY_COLORS[category.color] }}
     >
       <button type="button" className={styles.back} onClick={() => navigate('/categories')} aria-label="뒤로">
