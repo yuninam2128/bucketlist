@@ -52,8 +52,8 @@ export function CalendarPage() {
       />
 
       <div className={styles.diaries}>
-        {monthEntries.map((entry) => (
-          <DiaryCard key={entry.id} entry={entry} onOpen={() => setNoteFor(entry.id)} />
+        {monthEntries.map((entry, i) => (
+          <DiaryCard key={entry.id} entry={entry} index={i} onOpen={() => setNoteFor(entry.id)} />
         ))}
         {monthEntries.length === 0 && <p className={styles.empty}>이 달의 기록이 아직 없어요</p>}
       </div>

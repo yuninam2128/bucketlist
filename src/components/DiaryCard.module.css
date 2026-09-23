@@ -16,15 +16,30 @@
   transform: scale(0.98);
 }
 
-/* 마스킹 테이프 */
+/* 마스킹 테이프 (Figma 64:577) — 색은 카테고리별로 인라인 지정, 방향은 3가지 */
 .tape {
   position: absolute;
-  left: -10.5px;
-  top: 62.5px;
   width: 16.56px;
   height: 66.1px;
-  background: rgba(138, 0, 4, 0.8);
+  z-index: 1;
+}
+
+.tape1 {
+  left: -10.5px;
+  top: 62.5px;
   transform: rotate(-43.66deg);
+}
+
+.tape2 {
+  left: -2.5px;
+  top: 76.4px;
+  transform: rotate(-108.65deg);
+}
+
+.tape3 {
+  left: -9px;
+  top: 81px;
+  transform: rotate(14.54deg);
 }
 
 .photo {

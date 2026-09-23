@@ -27,6 +27,16 @@ export const mockDiaries: DiaryEntry[] = [
     photos: [samplePhoto],
     notes: [{ author: 'partner', text: '팝콘 대성공 🍿' }],
   },
+  {
+    id: 'd-0901',
+    date: '2026-09-01',
+    bucketItemId: 'travel-1',
+    photos: [samplePhoto, samplePhoto],
+    notes: [
+      { author: 'me', text: '도톤보리 최고' },
+      { author: 'partner', text: '또 가자!' },
+    ],
+  },
 ]
 
 export const mockCategories: Category[] = [
