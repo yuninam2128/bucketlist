@@ -1,23 +1,32 @@
-/* 좌표는 Figma 45:2 항목 한 줄 기준 (원 33px + 밑줄 281px) */
+/* 좌표는 Figma 45:2 항목 한 줄 기준 (원 33px + 밑줄 281px, 줄 간격 57px) */
 .row {
-  position: relative;
   width: 281px;
-  height: 57px;
+}
+
+/* 제목 영역: 한 줄이면 33px (Figma 그대로), 길면 위로 늘어남.
+   동그라미·밑줄·배지는 모두 아래쪽에 붙어서 마지막 줄을 받쳐줌 */
+.lineArea {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 33px;
+  padding-left: 40px;
 }
 
 .line {
   position: absolute;
   left: 0;
-  top: 0;
+  bottom: 0;
   width: 281px;
-  height: 33.5px;
+  /* Figma 77:716 — 밑줄이 원 아래 끝(y 32.5)에 딱 붙음 */
+  height: 33px;
   pointer-events: none;
 }
 
 .checkbox {
   position: absolute;
   left: 0;
-  top: 0;
+  bottom: 0;
   width: 33px;
   height: 33px;
   border-radius: 50%;
@@ -32,15 +41,29 @@
   transform: rotate(23.06deg);
 }
 
+/* 한 줄일 때 Figma처럼 글자 윗선이 y 8 에 오도록 (33 - 22 - 3) */
 .title {
-  position: absolute;
-  left: 40px;
-  top: 8px;
-  max-width: 160px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 3px;
   font-size: 17px;
+  line-height: 22px;
+  text-align: left;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+/* 완료 항목은 눌러서 추억 보기 — 끝에 작은 › */
+.titleLink::after {
+  content: '›';
+  /* inline-block이라 취소선이 안 그어짐 */
+  display: inline-block;
+  margin-left: 4px;
 }
 
 .done .title {
@@ -48,18 +71,30 @@
   text-decoration: line-through;
 }
 
-/* .row로 한 단계 올려서 CategoryBadge의 position: relative보다 우선 */
+/* Figma 기준 x 208~275 (오른쪽 6px 여백). 이름 길이만큼만 자리를 차지하고,
+   제목은 남은 폭을 씀. 마지막 줄 높이에 맞춤 */
 .row .badge {
-  position: absolute;
-  left: 208px;
-  top: 5px;
+  flex-shrink: 0;
+  align-self: flex-end;
+  max-width: 92px;
+  margin: 0 6px 8px 8px;
 }
 
-.date {
-  position: absolute;
-  right: 0;
-  top: 36px;
+/* 밑줄 아래: 12월 25일 | 수정 */
+.meta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding-bottom: 8px;
   font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
+}
+
+.edit {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 0;
 }

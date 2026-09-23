@@ -1,10 +1,9 @@
 import { createContext, useContext } from 'react'
-import type { Author, BucketItem, Category, CategoryColor, Couple, DiaryEntry } from '../types'
+import type { Author, BucketItem, Category, Couple, DiaryEntry } from '../types'
 
 export interface NewCategory {
   title: string
-  description?: string
-  color: CategoryColor
+  color: string
 }
 
 export interface NewItem {
@@ -36,8 +35,15 @@ export interface Store {
   uncompleteItem: (id: string) => void
   /** 기록에 내 한마디 남기기/수정 (빈 문자열이면 삭제) */
   saveNote: (diaryId: string, text: string) => void
+  /** 추억에 사진 더하기 (첫 사진이면 누끼 스티커도) */
+  addPhotos: (diaryId: string, photos: string[], stickerJob?: Promise<string>) => void
+  /** 기록 없이 완료한 항목에 빈 추억 만들기 → 추억 id */
+  startMemory: (itemId: string) => string
   addCategory: (input: NewCategory) => Category
   addItem: (input: NewItem) => void
+  updateItem: (id: string, input: NewItem) => void
+  /** 항목 삭제 — 그 항목으로 남긴 추억도 같이 지움 */
+  deleteItem: (id: string) => void
 }
 
 export const StoreContext = createContext<Store | null>(null)

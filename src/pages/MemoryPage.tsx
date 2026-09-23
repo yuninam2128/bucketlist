@@ -1,0 +1,138 @@
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router'
+import arrowLeft from '../assets/figma/icon-arrow-left.png'
+import nameEllipse from '../assets/figma/name-ellipse.svg'
+import { AddButton } from '../components/AddButton'
+import { CategoryBadge } from '../components/CategoryBadge'
+import { NoteForm } from '../components/NoteForm'
+import { useStore } from '../data/store'
+import { tapeColor } from '../lib/categoryColors'
+import { formatMonthDay } from '../lib/date'
+import { loadPhotos, stickerJobFor } from '../lib/photos'
+import styles from './MemoryPage.module.css'
+
+// 추억 상세: 사진 전부 넘겨보기 + 두 사람 소감 전문 + 사진/한마디 더하기
+export function MemoryPage() {
+  const { memoryId } = useParams()
+  const [params] = useSearchParams()
+  const navigate = useNavigate()
+  const { diaries, items, categories, couple, currentUser, saveNote, addPhotos } = useStore()
+  const [writing, setWriting] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [current, setCurrent] = useState(0)
+  const strip = useRef<HTMLUListElement>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  const entry = diaries.find((d) => d.id === memoryId)
+  const startPhoto = Number(params.get('photo') ?? 0)
+
+  // 앨범에서 특정 사진을 눌러 들어오면 그 사진부터
+  useEffect(() => {
+    const el = strip.current
+    const target = el?.children[startPhoto] as HTMLElement | undefined
+    if (el && target) el.scrollLeft = target.offsetLeft - (el.clientWidth - target.clientWidth) / 2
+  }, [startPhoto])
+
+  if (!entry) return <Navigate to="/calendar" replace />
+
+  const item = items.find((it) => it.id === entry.bucketItemId)
+  const category = item && categories.find((c) => c.id === item.categoryId)
+  const mine = entry.notes.find((n) => n.author === currentUser)
+
+  const onScroll = () => {
+    const el = strip.current
+    if (!el || el.children.length < 2) return
+    // 사진 한 장 + 간격만큼이 한 칸
+    const step = (el.children[1] as HTMLElement).offsetLeft - (el.children[0] as HTMLElement).offsetLeft
+    setCurrent(Math.round(el.scrollLeft / step))
+  }
+
+  const onPickPhotos = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (files.length === 0) return
+    setUploading(true)
+    try {
+      const photos = await loadPhotos(files)
+      // 첫 사진이 생기는 순간이면 캘린더 스티커도 만들기
+      const job = entry.photos.length === 0 && !entry.sticker ? stickerJobFor(photos[0].blob) : undefined
+      addPhotos(
+        entry.id,
+        photos.map((p) => p.url),
+        job,
+      )
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className={styles.page}>
+      <button type="button" className={styles.back} onClick={() => navigate(-1)} aria-label="뒤로">
+        <img src={arrowLeft} alt="" />
+      </button>
+
+      <header className={styles.header}>
+        <div className={styles.tape} style={{ background: tapeColor(category?.color ?? '#d2a5a6') }} />
+        <p className={styles.date}>{formatMonthDay(entry.date)} 완료</p>
+        <h1 className={styles.title}>{item?.title ?? '우리의 추억'}</h1>
+        {category && <CategoryBadge category={category} />}
+      </header>
+
+      {entry.photos.length > 0 ? (
+        <>
+          <ul ref={strip} className={styles.strip} onScroll={onScroll}>
+            {entry.photos.map((src, i) => (
+              <li key={i} className={`${styles.slide} ${i % 2 ? styles.tiltRight : styles.tiltLeft}`}>
+                <img src={src} alt={`사진 ${i + 1}`} />
+              </li>
+            ))}
+          </ul>
+          <p className={styles.counter}>
+            {Math.min(current, entry.photos.length - 1) + 1} / {entry.photos.length}
+          </p>
+        </>
+      ) : (
+        <p className={styles.empty}>아직 사진이 없어요</p>
+      )}
+
+      <div className={styles.addPhoto}>
+        <AddButton label={uploading ? '올리는 중…' : '사진 추가'} onClick={() => fileInput.current?.click()} />
+        <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={onPickPhotos} />
+      </div>
+
+      <section className={styles.notes}>
+        {entry.notes.map((n) => (
+          <div key={n.author} className={styles.note}>
+            <div className={styles.noteHead}>
+              <span className={styles.name}>
+                <img src={nameEllipse} alt="" />
+                <span>{couple.names[n.author]}</span>
+              </span>
+              {n.author === currentUser && (
+                <button type="button" className={styles.edit} onClick={() => setWriting(true)}>
+                  고치기
+                </button>
+              )}
+            </div>
+            <p className={styles.text}>{n.text}</p>
+          </div>
+        ))}
+        {!mine && (
+          <AddButton label="한마디 추가" className={styles.addNote} onClick={() => setWriting(true)} />
+        )}
+      </section>
+
+      {writing && (
+        <NoteForm
+          entry={entry}
+          onCancel={() => setWriting(false)}
+          onSubmit={(text) => {
+            saveNote(entry.id, text)
+            setWriting(false)
+          }}
+        />
+      )}
+    </div>
+  )
+}

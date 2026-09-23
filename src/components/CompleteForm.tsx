@@ -1,19 +1,17 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import type { Completion } from '../data/store'
 import { toYmd } from '../lib/date'
-import { compressImage } from '../lib/image'
-import { makeSticker } from '../lib/sticker'
+import { loadPhotos, stickerJobFor, type LocalPhoto } from '../lib/photos'
 import type { BucketItem } from '../types'
 import styles from './CompleteForm.module.css'
+import { DateField } from './DateField'
 import { Popup } from './Popup'
 import popup from './Popup.module.css'
 
-const MAX_PHOTOS = 2
+// 추억 상세에서 나중에 더 올릴 수도 있음
+const MAX_PHOTOS = 10
 
-interface Photo {
-  url: string
-  blob: Blob
-}
+type Photo = LocalPhoto
 
 interface StickerJob {
   /** 어떤 사진으로 만든 스티커인지 (대표 사진이 바뀌면 새로 만듦) */
@@ -47,7 +45,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       return
     }
     if (sticker.current?.photoUrl === first.url) return
-    const job = makeSticker(first.blob).then((b) => URL.createObjectURL(b))
+    const job = stickerJobFor(first.blob)
     const current: StickerJob = { photoUrl: first.url, job }
     sticker.current = current
     setStickerStatus('working')
@@ -64,9 +62,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
     setLoading(true)
     setError('')
     try {
-      // TODO: Supabase 연결 시 blob을 Storage에 올리고 받은 URL로 교체
-      const blobs = await Promise.all(files.map((f) => compressImage(f)))
-      const next = [...photos, ...blobs.map((blob) => ({ url: URL.createObjectURL(blob), blob }))].slice(0, MAX_PHOTOS)
+      const next = [...photos, ...(await loadPhotos(files))].slice(0, MAX_PHOTOS)
       setPhotos(next)
       syncSticker(next)
     } catch {
@@ -103,13 +99,10 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
     >
       <p className={styles.itemTitle}>{item.title}</p>
 
-      <label className={popup.field}>
-        <span className={popup.label}>언제</span>
-        <input className={popup.input} type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-      </label>
+      <DateField label="언제" value={date} onChange={setDate} />
 
       <div className={popup.field}>
-        <span className={popup.label}>사진 (선택, 최대 {MAX_PHOTOS}장)</span>
+        <span className={popup.label}>사진 (선택, 최대 {MAX_PHOTOS}장 · 첫 장이 대표)</span>
         <div className={styles.photos}>
           {photos.map((p, i) => (
             <div key={p.url} className={`${styles.photo} ${i % 2 ? styles.tiltRight : styles.tiltLeft}`}>

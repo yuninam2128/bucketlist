@@ -22,3 +22,30 @@
   border-color: #000;
   opacity: 1;
 }
+
+.deleteLink {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.confirm {
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1px dashed #8a0004;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.danger {
+  color: #8a0004;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

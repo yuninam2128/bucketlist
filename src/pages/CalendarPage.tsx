@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { DdayCard } from '../components/DdayCard'
 import { DiaryCard } from '../components/DiaryCard'
 import { MonthCalendar } from '../components/MonthCalendar'
@@ -8,6 +9,7 @@ import styles from './CalendarPage.module.css'
 
 export function CalendarPage() {
   const { diaries, saveNote } = useStore()
+  const navigate = useNavigate()
   const [noteFor, setNoteFor] = useState<string | null>(null)
   const noteEntry = diaries.find((d) => d.id === noteFor)
   const [view, setView] = useState(() => {
@@ -60,7 +62,13 @@ export function CalendarPage() {
 
       <div className={styles.diaries}>
         {monthEntries.map((entry, i) => (
-          <DiaryCard key={entry.id} entry={entry} index={i} onOpen={() => setNoteFor(entry.id)} />
+          <DiaryCard
+            key={entry.id}
+            entry={entry}
+            index={i}
+            onOpen={() => navigate(`/memories/${entry.id}`)}
+            onAddNote={() => setNoteFor(entry.id)}
+          />
         ))}
         {monthEntries.length === 0 && <p className={styles.empty}>이 달의 기록이 아직 없어요</p>}
       </div>

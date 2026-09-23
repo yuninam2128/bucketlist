@@ -8,9 +8,11 @@ interface Props {
   /** 0-11 */
   month: number
   /** 기록이 있는 날짜 (YYYY-MM-DD) */
-  markedDates: Set<string>
+  markedDates?: Set<string>
   /** 날짜별 대표 누끼 스티커. 없으면 점으로 표시 */
-  stickers: Map<string, string>
+  stickers?: Map<string, string>
+  /** 팝업 안 날짜 선택용 작은 달력 (폭 100%, 칸 낮게, 숫자 가운데) */
+  compact?: boolean
   selected?: string
   onSelect: (ymd: string) => void
   onPrevMonth: () => void
@@ -22,6 +24,7 @@ export function MonthCalendar({
   month,
   markedDates,
   stickers,
+  compact = false,
   selected,
   onSelect,
   onPrevMonth,
@@ -38,7 +41,7 @@ export function MonthCalendar({
   })
 
   return (
-    <section className={styles.calendar}>
+    <section className={`${styles.calendar} ${compact ? styles.compact : ''}`}>
       {/* 가운데는 D+N 카드가 덮으므로 양쪽 모서리만 사용 */}
       <header className={styles.header}>
         <h2 className={styles.title}>
@@ -72,7 +75,7 @@ export function MonthCalendar({
           ]
             .filter(Boolean)
             .join(' ')
-          const sticker = stickers.get(ymd)
+          const sticker = stickers?.get(ymd)
           return (
             <button key={i} type="button" className={classes} onClick={() => onSelect(ymd)}>
               {sticker ? (
@@ -83,7 +86,7 @@ export function MonthCalendar({
                   alt="기록 있음"
                 />
               ) : (
-                markedDates.has(ymd) && <span className={styles.mark} aria-label="기록 있음" />
+                markedDates?.has(ymd) && <span className={styles.mark} aria-label="기록 있음" />
               )}
               <span className={styles.num}>{day}</span>
             </button>

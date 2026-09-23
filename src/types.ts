@@ -2,15 +2,12 @@
 
 export type Author = 'me' | 'partner'
 
-/** Figma 카테고리 컴포넌트(64:592 배지, 64:605 폴더)의 6가지 색 */
-export type CategoryColor = 'beige' | 'green' | 'pink' | 'purple' | 'blue' | 'rose'
-
 export interface Category {
   id: string
+  /** 폴더·스티커·배지에 공통으로 쓰는 이름 (예: "영화 뭐볼까") */
   title: string
-  color: CategoryColor
-  /** 카테고리 스티커에 제목 아래로 들어가는 짧은 설명 (예: "뭐볼까") */
-  description?: string
+  /** 팔레트(lib/categoryColors) 중 하나의 hex */
+  color: string
   /** 폴더에서 삐져나오는 대표 사진 (최대 3장 표시) */
   coverPhotos: string[]
 }
@@ -32,7 +29,7 @@ export interface Couple {
   names: Record<Author, string>
 }
 
-/** 캘린더 하루 기록: 사진 최대 2장 + 각자 한마디. 버킷리스트를 완료하며 남김 */
+/** 추억: 버킷리스트를 완료하며 남긴 사진 여러 장 + 각자 한마디. 캘린더에 표시 */
 export interface DiaryEntry {
   id: string
   /** YYYY-MM-DD */

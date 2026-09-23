@@ -121,6 +121,34 @@
   z-index: 1;
 }
 
+/* ---- compact: 팝업 안 날짜 선택 ---- */
+.compact {
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+
+.compact .header {
+  height: 40px;
+}
+
+.compact .weekday {
+  height: 28px;
+  font-size: 11px;
+}
+
+.compact .cell {
+  height: 34px;
+}
+
+.compact .num {
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 14px;
+}
+
 .mark {
   position: absolute;
   left: 50%;

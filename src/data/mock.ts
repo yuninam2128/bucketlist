@@ -5,8 +5,8 @@ import type { BucketItem, Category, Couple, DiaryEntry } from '../types'
 // Supabase 연결 전까지 쓰는 임시 데이터
 
 export const mockCouple: Couple = {
-  startDate: '2026-08-21',
-  names: { me: '로빈슨', partner: '방드르디' },
+  startDate: '2026-07-18',
+  names: { me: '유니', partner: '차니' },
 }
 
 // 완료한 항목에 남긴 기록
@@ -15,7 +15,7 @@ export const mockDiaries: DiaryEntry[] = [
     id: 'd-0921',
     date: '2026-09-21',
     bucketItemId: 'movie-3',
-    photos: [samplePhoto, samplePhoto],
+    photos: Array(5).fill(samplePhoto),
     sticker: sampleSticker,
     notes: [
       { author: 'me', text: '오늘은 즐거워따' },
@@ -43,10 +43,10 @@ export const mockDiaries: DiaryEntry[] = [
 ]
 
 export const mockCategories: Category[] = [
-  { id: 'movie', title: '영화', color: 'green', description: '뭐볼까', coverPhotos: [] },
-  { id: 'travel', title: '여행', color: 'blue', description: '어디갈까', coverPhotos: [] },
-  { id: 'food', title: '맛집', color: 'pink', description: '뭐먹을까', coverPhotos: [] },
-  { id: 'etc', title: '해보고 싶은 것', color: 'beige', coverPhotos: [] },
+  { id: 'movie', title: '영화 뭐볼까', color: '#c0dac3', coverPhotos: [] },
+  { id: 'travel', title: '여행 어디갈까', color: '#c0c4da', coverPhotos: [] },
+  { id: 'food', title: '맛집 뭐먹을까', color: '#e2a4bf', coverPhotos: [] },
+  { id: 'etc', title: '해보고 싶은 것', color: '#daccc0', coverPhotos: [] },
 ]
 
 const movie = (i: number, title: string, done = false, date = '2026-12-25'): BucketItem => ({
@@ -62,6 +62,7 @@ export const mockItems: BucketItem[] = [
   movie(0, '인터스텔라 재개봉 보기'),
   movie(1, '심야영화 보기'),
   movie(2, '자동차 극장 가기'),
+  movie(5, '크리스마스에 영화관 전세 내고 좋아하는 영화 세 편 연달아 보기'),
   movie(3, '영화제 가기', true, '2026-09-21'),
   movie(4, '팝콘 직접 만들기', true, '2026-09-13'),
   { id: 'travel-0', categoryId: 'travel', title: '제주도 한달살기', done: false, author: 'me' },

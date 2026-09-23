@@ -1,10 +1,10 @@
-/* 67x20 박스, 글자는 왼쪽 16% 지점부터 */
+/* Figma 67x20 알약. 이름 길이에 따라 가로로 늘어남 (손그림 path가 같이 늘어남) */
 .badge {
   position: relative;
   display: inline-block;
-  width: 67px;
+  min-width: 67px;
   height: 20px;
-  padding: 4px 6px 0 11px;
+  padding: 4px 9px 0 11px;
   font-size: 12px;
   line-height: 1.1;
   white-space: nowrap;
@@ -15,7 +15,7 @@
   position: absolute;
   top: 0;
   left: 0.75px;
-  width: 65.95px;
+  width: calc(100% - 1px);
   height: 20.06px;
 }
 

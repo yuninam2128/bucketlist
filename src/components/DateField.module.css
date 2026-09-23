@@ -1,0 +1,27 @@
+.row {
+  position: relative;
+}
+
+.trigger {
+  text-align: left;
+  cursor: pointer;
+}
+
+.placeholder {
+  color: #b5b5b5;
+}
+
+.clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.calendar {
+  margin-top: 10px;
+}

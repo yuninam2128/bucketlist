@@ -3,7 +3,7 @@ import arrow2 from '../assets/figma/diary-arrow-2.svg'
 import nameEllipse from '../assets/figma/name-ellipse.svg'
 import { useStore } from '../data/store'
 import { AddButton } from './AddButton'
-import { CATEGORY_TAPE_COLORS } from '../lib/categoryColors'
+import { tapeColor } from '../lib/categoryColors'
 import { formatMonthDay } from '../lib/date'
 import type { DiaryEntry } from '../types'
 import styles from './DiaryCard.module.css'
@@ -22,18 +22,20 @@ interface Props {
   entry: DiaryEntry
   /** 목록에서의 순서 — 이웃한 카드끼리 테이프 방향이 겹치지 않게 */
   index: number
-  /** 카드를 누르면 한마디 남기기 */
+  /** 카드를 누르면 추억 상세 */
   onOpen: () => void
+  /** "한마디 추가" 테이프 */
+  onAddNote: () => void
 }
 
-// 사진 2장 + 각자 한마디가 화살표로 이어지는 하루 기록 카드
-export function DiaryCard({ entry, index, onOpen }: Props) {
+// 사진 2장(+N) + 각자 한마디(길면 말줄임)가 화살표로 이어지는 추억 카드. 전체는 추억 상세에서
+export function DiaryCard({ entry, index, onOpen, onAddNote }: Props) {
   const { couple, items, categories, currentUser } = useStore()
   const notes = entry.notes.slice(0, 2)
   const item = entry.bucketItemId ? items.find((it) => it.id === entry.bucketItemId) : undefined
   const category = item && categories.find((c) => c.id === item.categoryId)
   // 테이프는 그 버킷리스트 카테고리 색을 진하게 (카테고리 없으면 Figma 기본 rose)
-  const tapeColor = CATEGORY_TAPE_COLORS[category?.color ?? 'rose']
+  const tape = tapeColor(category?.color ?? '#d2a5a6')
   const iWrote = entry.notes.some((n) => n.author === currentUser)
 
   return (
@@ -43,19 +45,20 @@ export function DiaryCard({ entry, index, onOpen }: Props) {
       className={styles.card}
       role="button"
       tabIndex={0}
-      aria-label={iWrote ? '내 한마디 고치기' : '한마디 남기기'}
+      aria-label={`${item?.title ?? '추억'} 자세히 보기`}
       onClick={onOpen}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen()}
     >
       <div
         className={`${styles.tape} ${tapeSlots[index % tapeSlots.length]}`}
-        style={{ background: tapeColor }}
+        style={{ background: tape }}
         aria-hidden
       />
 
       {entry.photos.slice(0, 2).map((src, i) => (
         <div key={i} className={`${styles.photo} ${photoSlots[i]}`}>
           <img src={src} alt="" />
+          {i === 1 && entry.photos.length > 2 && <span className={styles.more}>+{entry.photos.length - 2}</span>}
         </div>
       ))}
 
@@ -79,7 +82,7 @@ export function DiaryCard({ entry, index, onOpen }: Props) {
           className={`${styles.addNote} ${addNoteSlots[notes.length]}`}
           onClick={(e) => {
             e.stopPropagation()
-            onOpen()
+            onAddNote()
           }}
         />
       )}

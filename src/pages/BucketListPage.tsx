@@ -3,7 +3,6 @@ import arrowLeft from '../assets/figma/icon-arrow-left.png'
 import arrowRight from '../assets/figma/icon-arrow-right.png'
 import { BucketBoard } from '../components/BucketBoard'
 import { useStore } from '../data/store'
-import { CATEGORY_COLORS } from '../lib/categoryColors'
 import styles from './BucketListPage.module.css'
 
 export function BucketListPage() {
@@ -22,7 +21,7 @@ export function BucketListPage() {
     <BucketBoard
       items={items.filter((it) => it.categoryId === category.id)}
       defaultCategoryId={category.id}
-      sticky={{ title: category.title, description: category.description, color: CATEGORY_COLORS[category.color] }}
+      sticky={{ title: category.title, color: category.color }}
     >
       <button type="button" className={styles.back} onClick={() => navigate('/categories')} aria-label="뒤로">
         <img src={arrowLeft} alt="" />

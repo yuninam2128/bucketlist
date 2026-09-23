@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { NewCategory } from '../data/store'
-import { CATEGORY_COLOR_KEYS } from '../lib/categoryColors'
-import type { CategoryColor } from '../types'
+import { COLOR_FAMILIES, DEFAULT_CATEGORY_COLOR, familyOf } from '../lib/categoryColors'
 import { CategoryBadge } from './CategoryBadge'
 import styles from './CategoryForm.module.css'
 import { Folder } from './Folder'
@@ -13,11 +12,11 @@ interface Props {
   onCancel: () => void
 }
 
-// 새 카테고리: 이름 + 한줄 설명 + 폴더 색 6가지 중 선택
+// 새 카테고리: 이름 + 색 (계열 6개 → 그 계열의 진하기 4단계)
 export function CategoryForm({ onSubmit, onCancel }: Props) {
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [color, setColor] = useState<CategoryColor>(CATEGORY_COLOR_KEYS[0])
+  const [color, setColor] = useState(DEFAULT_CATEGORY_COLOR)
+  const family = familyOf(color)
 
   const trimmed = title.trim()
 
@@ -26,7 +25,7 @@ export function CategoryForm({ onSubmit, onCancel }: Props) {
       title="새 카테고리"
       canSubmit={!!trimmed}
       onCancel={onCancel}
-      onSubmit={() => onSubmit({ title: trimmed, description: description.trim() || undefined, color })}
+      onSubmit={() => onSubmit({ title: trimmed, color })}
     >
       <label className={popup.field}>
         <span className={popup.label}>이름</span>
@@ -35,36 +34,42 @@ export function CategoryForm({ onSubmit, onCancel }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={12}
-          placeholder="영화"
+          placeholder="영화 뭐볼까"
           autoFocus
-        />
-      </label>
-      <label className={popup.field}>
-        <span className={popup.label}>한줄 설명</span>
-        <input
-          className={popup.input}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          maxLength={10}
-          placeholder="뭐볼까"
         />
       </label>
 
       <fieldset className={styles.colors}>
         <legend className={popup.label}>폴더 색</legend>
-        {CATEGORY_COLOR_KEYS.map((key) => (
+        {COLOR_FAMILIES.map((f) => (
           <button
-            key={key}
+            key={f.key}
             type="button"
-            className={`${styles.swatch} ${key === color ? styles.selected : ''}`}
-            onClick={() => setColor(key)}
-            aria-pressed={key === color}
-            aria-label={key}
+            className={`${styles.swatch} ${f.key === family.key ? styles.selected : ''}`}
+            // 계열을 바꾸면 그 계열의 기본(2번째) 색으로
+            onClick={() => setColor(f.shades[1])}
+            aria-pressed={f.key === family.key}
+            aria-label={f.label}
           >
-            <Folder color={key} className={styles.miniFolder} />
+            <Folder color={f.key === family.key ? color : f.shades[1]} className={styles.miniFolder} />
           </button>
         ))}
       </fieldset>
+
+      <div className={styles.shades} role="radiogroup" aria-label={`${family.label} 진하기`}>
+        {family.shades.map((shade, i) => (
+          <button
+            key={shade}
+            type="button"
+            role="radio"
+            aria-checked={shade === color}
+            aria-label={`${family.label} ${i + 1}단계`}
+            className={`${styles.shade} ${shade === color ? styles.shadeSelected : ''}`}
+            style={{ background: shade }}
+            onClick={() => setColor(shade)}
+          />
+        ))}
+      </div>
 
       <div className={styles.preview}>
         <CategoryBadge category={{ id: 'preview', title: trimmed || '미리보기', color, coverPhotos: [] }} />

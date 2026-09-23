@@ -128,6 +128,24 @@
   white-space: pre-line;
   word-break: keep-all;
   line-height: 1.25;
+  /* 길면 3줄까지만, 전문은 추억 상세에서 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 사진이 3장 이상이면 두 번째 사진 위에 +N */
+.more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 17px;
 }
 
 /* AddButton(169x112, 테이프는 y 30~80)을 한마디 자리에 맞춰 배치. 글자 시작점을 메모 글자(x 175)와 맞춤 */

@@ -5,6 +5,7 @@ import { BucketListPage } from './pages/BucketListPage'
 import { CalendarPage } from './pages/CalendarPage'
 import { CategoriesPage } from './pages/CategoriesPage'
 import { HomePage } from './pages/HomePage'
+import { MemoryPage } from './pages/MemoryPage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/:categoryId" element={<BucketListPage />} />
             <Route path="calendar" element={<CalendarPage />} />
+            <Route path="memories/:memoryId" element={<MemoryPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

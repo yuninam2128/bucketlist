@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { toYmd } from '../lib/date'
 import type { Author, Category, DiaryEntry } from '../types'
 import { mockCategories, mockCouple, mockDiaries, mockItems } from './mock'
 import { StoreContext, type Completion, type NewCategory, type NewItem, type Store } from './store'
@@ -15,6 +16,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState(mockItems)
   const [diaries, setDiaries] = useState(mockDiaries)
 
+  // 누끼가 늦게 끝나도 기록에 붙여줌. 실패하면 스티커 없이(빨간 점) 표시
+  const attachSticker = (diaryId: string, stickerJob?: Promise<string>) =>
+    stickerJob
+      ?.then((sticker) => setDiaries((prev) => prev.map((d) => (d.id === diaryId ? { ...d, sticker } : d))))
+      .catch(() => {})
+
   const completeItem = useCallback((id: string, { date, photos, note, stickerJob }: Completion) => {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, done: true, date } : it)))
     if (photos.length === 0 && !note) return
@@ -26,10 +33,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       notes: note ? [{ author: currentUser, text: note }] : [],
     }
     setDiaries((prev) => [...prev, entry])
-    // 누끼가 늦게 끝나도 기록에 붙여줌. 실패하면 스티커 없이(빨간 점) 표시
-    stickerJob
-      ?.then((sticker) => setDiaries((prev) => prev.map((d) => (d.id === entry.id ? { ...d, sticker } : d))))
-      .catch(() => {})
+    attachSticker(entry.id, stickerJob)
   }, [])
 
   const uncompleteItem = useCallback((id: string) => {
@@ -53,6 +57,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const addPhotos = useCallback((diaryId: string, photos: string[], stickerJob?: Promise<string>) => {
+    setDiaries((prev) => prev.map((d) => (d.id === diaryId ? { ...d, photos: [...d.photos, ...photos] } : d)))
+    attachSticker(diaryId, stickerJob)
+  }, [])
+
+  const startMemory = useCallback(
+    (itemId: string) => {
+      const item = items.find((it) => it.id === itemId)
+      const entry: DiaryEntry = {
+        id: tempId(),
+        date: item?.date ?? toYmd(new Date()),
+        bucketItemId: itemId,
+        photos: [],
+        notes: [],
+      }
+      setDiaries((prev) => [...prev, entry])
+      return entry.id
+    },
+    [items],
+  )
+
   const addCategory = useCallback((input: NewCategory) => {
     const category: Category = { id: tempId(), coverPhotos: [], ...input }
     setCategories((prev) => [...prev, category])
@@ -61,6 +86,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((input: NewItem) => {
     setItems((prev) => [...prev, { id: tempId(), done: false, author: currentUser, ...input }])
+  }, [])
+
+  const updateItem = useCallback((id: string, input: NewItem) => {
+    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...input } : it)))
+  }, [])
+
+  const deleteItem = useCallback((id: string) => {
+    setItems((prev) => prev.filter((it) => it.id !== id))
+    setDiaries((prev) => prev.filter((d) => d.bucketItemId !== id))
   }, [])
 
   const store = useMemo<Store>(
@@ -73,10 +107,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       completeItem,
       uncompleteItem,
       saveNote,
+      addPhotos,
+      startMemory,
       addCategory,
       addItem,
+      updateItem,
+      deleteItem,
     }),
-    [categories, items, diaries, completeItem, uncompleteItem, saveNote, addCategory, addItem],
+    [categories, items, diaries, completeItem, uncompleteItem, saveNote, addPhotos, startMemory, addCategory, addItem, updateItem, deleteItem],
   )
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>

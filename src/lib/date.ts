@@ -1,11 +1,16 @@
 const DAY = 24 * 60 * 60 * 1000
 
-/** 사귄 날로부터 오늘까지 지난 일수 (D+N) */
+/** 그 날로부터 오늘까지 지난 일수 (당일 = 0) */
 export function daysSince(ymd: string, today = new Date()): number {
   const [y, m, d] = ymd.split('-').map(Number)
   const start = Date.UTC(y, m - 1, d)
   const now = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
   return Math.floor((now - start) / DAY)
+}
+
+/** 커플 D+N: 한국식으로 사귄 날을 1일로 셈 (당일 = D+1) */
+export function coupleDays(startYmd: string, today = new Date()): number {
+  return daysSince(startYmd, today) + 1
 }
 
 /** 로컬 날짜 → 'YYYY-MM-DD' */
