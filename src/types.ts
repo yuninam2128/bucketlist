@@ -40,5 +40,7 @@ export interface DiaryEntry {
   /** 이 기록을 남긴 완료 항목 */
   bucketItemId?: string
   photos: string[]
+  /** 대표 사진(첫 장) 누끼 PNG — 캘린더 칸에 스티커로 붙음 */
+  sticker?: string
   notes: { author: Author; text: string }[]
 }

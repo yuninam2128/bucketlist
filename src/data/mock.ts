@@ -1,4 +1,5 @@
 import samplePhoto from '../assets/figma/sample-photo.jpg'
+import sampleSticker from '../assets/mock/sample-sticker.png'
 import type { BucketItem, Category, Couple, DiaryEntry } from '../types'
 
 // Supabase 연결 전까지 쓰는 임시 데이터
@@ -15,6 +16,7 @@ export const mockDiaries: DiaryEntry[] = [
     date: '2026-09-21',
     bucketItemId: 'movie-3',
     photos: [samplePhoto, samplePhoto],
+    sticker: sampleSticker,
     notes: [
       { author: 'me', text: '오늘은 즐거워따' },
       { author: 'partner', text: '일을 너무 많이 시켜서 담배피다가\n죄다 날려먹었다! 쫓겨나겠지' },
@@ -32,6 +34,7 @@ export const mockDiaries: DiaryEntry[] = [
     date: '2026-09-01',
     bucketItemId: 'travel-1',
     photos: [samplePhoto, samplePhoto],
+    sticker: sampleSticker,
     notes: [
       { author: 'me', text: '도톤보리 최고' },
       { author: 'partner', text: '또 가자!' },

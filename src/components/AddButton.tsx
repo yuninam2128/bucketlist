@@ -1,10 +1,11 @@
+import type { MouseEvent } from 'react'
 import addTape from '../assets/figma/add-tape.svg'
 import iconPlus from '../assets/figma/icon-plus.png'
 import styles from './AddButton.module.css'
 
 interface Props {
   label: string
-  onClick: () => void
+  onClick: (e: MouseEvent<HTMLButtonElement>) => void
   className?: string
 }
 

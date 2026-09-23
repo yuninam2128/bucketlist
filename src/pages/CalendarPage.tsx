@@ -23,6 +23,12 @@ export function CalendarPage() {
     [diaries, monthPrefix],
   )
   const markedDates = useMemo(() => new Set(monthEntries.map((d) => d.date)), [monthEntries])
+  // 하루에 기록이 여러 개면 가장 최근 기록의 스티커
+  const stickers = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const d of monthEntries) if (d.sticker && !map.has(d.date)) map.set(d.date, d.sticker)
+    return map
+  }, [monthEntries])
 
   const moveMonth = (delta: number) => {
     setSelected(undefined)
@@ -45,6 +51,7 @@ export function CalendarPage() {
         year={view.year}
         month={view.month}
         markedDates={markedDates}
+        stickers={stickers}
         selected={selected}
         onSelect={selectDate}
         onPrevMonth={() => moveMonth(-1)}

@@ -130,11 +130,18 @@
   line-height: 1.25;
 }
 
-.addNote {
-  padding: 4px 7px;
-  color: var(--text-muted);
-  border: 1px dashed var(--text-muted);
-  border-radius: 11px;
+/* AddButton(169x112, 테이프는 y 30~80)을 한마디 자리에 맞춰 배치. 글자 시작점을 메모 글자(x 175)와 맞춤 */
+.card .addNote {
+  position: absolute;
+  left: 148px;
+}
+
+.addNote1 {
+  top: -14px;
+}
+
+.addNote2 {
+  top: 78px;
 }
 
 .date {

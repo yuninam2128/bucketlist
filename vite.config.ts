@@ -25,6 +25,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff,ttf}'],
+        // 누끼용 AI 런타임(onnxruntime)은 스티커 만들 때만 받도록 미리 캐시에서 제외
+        globIgnores: ['**/ort*.js', '**/*.wasm'],
       },
       devOptions: {
         enabled: true,

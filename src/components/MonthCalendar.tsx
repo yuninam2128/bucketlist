@@ -9,13 +9,24 @@ interface Props {
   month: number
   /** 기록이 있는 날짜 (YYYY-MM-DD) */
   markedDates: Set<string>
+  /** 날짜별 대표 누끼 스티커. 없으면 점으로 표시 */
+  stickers: Map<string, string>
   selected?: string
   onSelect: (ymd: string) => void
   onPrevMonth: () => void
   onNextMonth: () => void
 }
 
-export function MonthCalendar({ year, month, markedDates, selected, onSelect, onPrevMonth, onNextMonth }: Props) {
+export function MonthCalendar({
+  year,
+  month,
+  markedDates,
+  stickers,
+  selected,
+  onSelect,
+  onPrevMonth,
+  onNextMonth,
+}: Props) {
   const firstWeekday = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const weeks = Math.ceil((firstWeekday + daysInMonth) / 7)
@@ -61,10 +72,20 @@ export function MonthCalendar({ year, month, markedDates, selected, onSelect, on
           ]
             .filter(Boolean)
             .join(' ')
+          const sticker = stickers.get(ymd)
           return (
             <button key={i} type="button" className={classes} onClick={() => onSelect(ymd)}>
+              {sticker ? (
+                // 날짜마다 살짝 다른 각도로 붙인 스티커
+                <img
+                  className={`${styles.sticker} ${day % 2 ? styles.tiltLeft : styles.tiltRight}`}
+                  src={sticker}
+                  alt="기록 있음"
+                />
+              ) : (
+                markedDates.has(ymd) && <span className={styles.mark} aria-label="기록 있음" />
+              )}
               <span className={styles.num}>{day}</span>
-              {markedDates.has(ymd) && <span className={styles.mark} aria-label="기록 있음" />}
             </button>
           )
         })}

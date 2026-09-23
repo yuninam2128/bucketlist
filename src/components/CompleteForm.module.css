@@ -53,6 +53,12 @@
   border-radius: 50%;
 }
 
+.stickerStatus {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .error {
   margin-top: 8px;
   font-size: 12px;

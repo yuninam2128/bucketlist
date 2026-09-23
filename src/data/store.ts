@@ -19,6 +19,8 @@ export interface Completion {
   /** 사진 URL (최대 2장) */
   photos: string[]
   note?: string
+  /** 대표 사진 누끼 작업 (오래 걸려서 완료 후에도 백그라운드로 계속) */
+  stickerJob?: Promise<string>
 }
 
 export interface Store {
@@ -28,7 +30,7 @@ export interface Store {
   categories: Category[]
   items: BucketItem[]
   diaries: DiaryEntry[]
-  /** 완료 처리 + 사진/소감이 있으면 그 날짜의 캘린더 기록으로 저장 */
+  /** 완료 처리 + 사진/소감이 있으면 그 날짜의 캘린더 기록으로 저장 (누끼는 준비되면 자동으로 붙음) */
   completeItem: (id: string, completion: Completion) => void
   /** 완료 취소 (남긴 기록은 유지) */
   uncompleteItem: (id: string) => void

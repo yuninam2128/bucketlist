@@ -15,7 +15,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState(mockItems)
   const [diaries, setDiaries] = useState(mockDiaries)
 
-  const completeItem = useCallback((id: string, { date, photos, note }: Completion) => {
+  const completeItem = useCallback((id: string, { date, photos, note, stickerJob }: Completion) => {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, done: true, date } : it)))
     if (photos.length === 0 && !note) return
     const entry: DiaryEntry = {
@@ -26,6 +26,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       notes: note ? [{ author: currentUser, text: note }] : [],
     }
     setDiaries((prev) => [...prev, entry])
+    // 누끼가 늦게 끝나도 기록에 붙여줌. 실패하면 스티커 없이(빨간 점) 표시
+    stickerJob
+      ?.then((sticker) => setDiaries((prev) => prev.map((d) => (d.id === entry.id ? { ...d, sticker } : d))))
+      .catch(() => {})
   }, [])
 
   const uncompleteItem = useCallback((id: string) => {

@@ -2,6 +2,7 @@ import arrow1 from '../assets/figma/diary-arrow-1.svg'
 import arrow2 from '../assets/figma/diary-arrow-2.svg'
 import nameEllipse from '../assets/figma/name-ellipse.svg'
 import { useStore } from '../data/store'
+import { AddButton } from './AddButton'
 import { CATEGORY_TAPE_COLORS } from '../lib/categoryColors'
 import { formatMonthDay } from '../lib/date'
 import type { DiaryEntry } from '../types'
@@ -11,6 +12,7 @@ const photoSlots = [styles.photo1, styles.photo2]
 // Figma 64:577 — 테이프 방향 3가지, 카드마다 돌아가며 사용
 const tapeSlots = [styles.tape1, styles.tape2, styles.tape3]
 const noteSlots = [styles.note1, styles.note2]
+const addNoteSlots = [styles.addNote1, styles.addNote2]
 const arrows = [
   { src: arrow1, className: styles.arrow1 },
   { src: arrow2, className: styles.arrow2 },
@@ -70,9 +72,16 @@ export function DiaryCard({ entry, index, onOpen }: Props) {
         </div>
       ))}
 
-      {/* 아직 내 한마디가 없으면 빈 자리에 안내 */}
+      {/* 아직 내 한마디가 없으면 빈 자리에 추가 테이프 */}
       {!iWrote && notes.length < 2 && (
-        <p className={`${styles.note} ${noteSlots[notes.length]} ${styles.addNote}`}>+ 한마디 남기기</p>
+        <AddButton
+          label="한마디 추가"
+          className={`${styles.addNote} ${addNoteSlots[notes.length]}`}
+          onClick={(e) => {
+            e.stopPropagation()
+            onOpen()
+          }}
+        />
       )}
 
       <p className={styles.date}>
