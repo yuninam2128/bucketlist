@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AppLayout } from './components/AppLayout'
 import { StoreProvider } from './data/StoreProvider'
 import { BucketListPage } from './pages/BucketListPage'
+import { CalendarPage } from './pages/CalendarPage'
 import { CategoriesPage } from './pages/CategoriesPage'
 
 export default function App() {
@@ -14,7 +15,8 @@ export default function App() {
             <Route index element={<Navigate to="/categories" replace />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="categories/:categoryId" element={<BucketListPage />} />
-            {/* TODO: 캘린더, 추가 화면 */}
+            <Route path="calendar" element={<CalendarPage />} />
+            {/* TODO: 추가 화면 */}
             <Route path="*" element={<Navigate to="/categories" replace />} />
           </Route>
         </Routes>

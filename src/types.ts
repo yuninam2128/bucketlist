@@ -26,4 +26,15 @@ export interface BucketItem {
 export interface Couple {
   /** 사귄 날 (YYYY-MM-DD) — D+N 계산 기준 */
   startDate: string
+  /** 일기 메모에 붙는 각자 닉네임 */
+  names: Record<Author, string>
+}
+
+/** 캘린더 하루 기록: 사진 최대 2장 + 각자 한마디 */
+export interface DiaryEntry {
+  id: string
+  /** YYYY-MM-DD */
+  date: string
+  photos: string[]
+  notes: { author: Author; text: string }[]
 }

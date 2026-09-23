@@ -1,0 +1,108 @@
+/* Figma 53:8 — 346px 박스, 상단 47px 헤더, 요일 50px, 주 49px */
+.calendar {
+  width: 346px;
+  border: 1px solid #000;
+  background: #fff;
+}
+
+.header {
+  height: 47px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 12px;
+  border-bottom: 1px solid #000;
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: normal;
+  line-height: 1.1;
+}
+
+.year {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.navs {
+  display: flex;
+}
+
+.nav {
+  width: 28px;
+  height: 40px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.weekday,
+.cell {
+  border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+.weekday:nth-child(7n),
+.cell:nth-child(7n) {
+  border-right: 0;
+}
+
+/* 마지막 주는 박스 테두리가 대신 */
+.cell:nth-last-child(-n + 7) {
+  border-bottom: 0;
+}
+
+.weekday {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+}
+
+.cell {
+  position: relative;
+  height: 49px;
+}
+
+.day {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.num {
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  font-size: 11px;
+}
+
+.today .num {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.selected {
+  background: var(--dday-pink);
+}
+
+.mark {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: rgba(138, 0, 4, 0.8);
+}

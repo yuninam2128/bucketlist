@@ -1,11 +1,30 @@
 import samplePhoto from '../assets/figma/sample-photo.jpg'
-import type { BucketItem, Category, Couple } from '../types'
+import type { BucketItem, Category, Couple, DiaryEntry } from '../types'
 
 // Supabase 연결 전까지 쓰는 임시 데이터
 
 export const mockCouple: Couple = {
   startDate: '2026-08-21',
+  names: { me: '로빈슨', partner: '방드르디' },
 }
+
+export const mockDiaries: DiaryEntry[] = [
+  {
+    id: 'd-0921',
+    date: '2026-09-21',
+    photos: [samplePhoto, samplePhoto],
+    notes: [
+      { author: 'me', text: '오늘은 즐거워따' },
+      { author: 'partner', text: '일을 너무 많이 시켜서 담배피다가\n죄다 날려먹었다! 쫓겨나겠지' },
+    ],
+  },
+  {
+    id: 'd-0913',
+    date: '2026-09-13',
+    photos: [samplePhoto],
+    notes: [{ author: 'partner', text: '한강 피크닉 🧺' }],
+  },
+]
 
 export const mockCategories: Category[] = [
   {

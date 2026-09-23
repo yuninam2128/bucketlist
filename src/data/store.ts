@@ -1,10 +1,11 @@
 import { createContext, useContext } from 'react'
-import type { BucketItem, Category, Couple } from '../types'
+import type { BucketItem, Category, Couple, DiaryEntry } from '../types'
 
 export interface Store {
   couple: Couple
   categories: Category[]
   items: BucketItem[]
+  diaries: DiaryEntry[]
   toggleItem: (id: string) => void
 }
 

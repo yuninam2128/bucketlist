@@ -2,16 +2,15 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import arrowLeft from '../assets/figma/icon-arrow-left.png'
 import arrowRight from '../assets/figma/icon-arrow-right.png'
 import categoryRule from '../assets/figma/category-rule.svg'
-import ddayEllipse from '../assets/figma/dday-ellipse.svg'
 import { BucketItemRow } from '../components/BucketItemRow'
+import { DdayCard } from '../components/DdayCard'
 import { useStore } from '../data/store'
-import { daysSince } from '../lib/date'
 import styles from './BucketListPage.module.css'
 
 export function BucketListPage() {
   const { categoryId } = useParams()
   const navigate = useNavigate()
-  const { couple, categories, items, toggleItem } = useStore()
+  const { categories, items, toggleItem } = useStore()
 
   const index = categories.findIndex((c) => c.id === categoryId)
   if (index === -1) return <Navigate to="/categories" replace />
@@ -23,7 +22,6 @@ export function BucketListPage() {
   const list = items
     .filter((it) => it.categoryId === category.id)
     .sort((a, b) => Number(a.done) - Number(b.done))
-  const dday = daysSince(couple.startDate)
 
   return (
     <div className={styles.page}>
@@ -32,14 +30,7 @@ export function BucketListPage() {
       </button>
 
       <section className={styles.paper}>
-        <div className={styles.ddayCard}>
-          <img className={styles.ddayEllipse} src={ddayEllipse} alt="" />
-          <p className={styles.dday} aria-label={`D+${dday}`}>
-            <span className={styles.ddayD}>D</span>
-            <span className={styles.ddayPlus}>+</span>
-            <span className={styles.ddayNum}>{dday}</span>
-          </p>
-        </div>
+        <DdayCard className={styles.ddayCard} />
 
         <div className={styles.sticky}>
           <p className={styles.stickyLabel}>CATEGORY</p>

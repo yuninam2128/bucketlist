@@ -1,0 +1,118 @@
+/* 좌표는 Figma 53:8 일기 카드(348x229) 왼쪽 위 기준 */
+.card {
+  position: relative;
+  width: 348px;
+  height: 229px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #000;
+  box-shadow: var(--shadow);
+  scroll-margin-top: 24px;
+}
+
+/* 마스킹 테이프 */
+.tape {
+  position: absolute;
+  left: -10.5px;
+  top: 62.5px;
+  width: 16.56px;
+  height: 66.1px;
+  background: rgba(138, 0, 4, 0.8);
+  transform: rotate(-43.66deg);
+}
+
+.photo {
+  position: absolute;
+  width: 79.45px;
+  height: 98px;
+  border-radius: 17px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  background: #eee;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo1 {
+  left: 28px;
+  top: 22px;
+  transform: rotate(-8.62deg);
+}
+
+.photo2 {
+  left: 72px;
+  top: 96px;
+  transform: rotate(12.36deg);
+}
+
+.arrow1 {
+  position: absolute;
+  left: 103.5px;
+  top: 37px;
+  width: 52.09px;
+  height: 38.77px;
+}
+
+.arrow2 {
+  position: absolute;
+  left: 139.2px;
+  top: 171.3px;
+  width: 36.22px;
+  height: 24.47px;
+  transform: rotate(-37.44deg) scaleY(-1);
+}
+
+.note {
+  position: absolute;
+  left: 168px;
+  max-width: 172px;
+  font-size: 12px;
+}
+
+.note1 {
+  top: 27px;
+}
+
+.note2 {
+  top: 119px;
+}
+
+/* 이름을 감싸는 손그림 타원: 글자 길이에 맞춰 늘어남 */
+.name {
+  position: relative;
+  display: inline-block;
+  height: 22px;
+  padding: 4px 7px 0;
+  white-space: nowrap;
+}
+
+.name img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.name span {
+  position: relative;
+}
+
+.text {
+  margin-top: 13px;
+  padding-left: 7px;
+  white-space: pre-line;
+  word-break: keep-all;
+  line-height: 1.25;
+}
+
+.date {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
