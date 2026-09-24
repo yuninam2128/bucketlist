@@ -7,6 +7,7 @@ import { AddButton } from './AddButton'
 import styles from './BucketBoard.module.css'
 import { BucketItemRow } from './BucketItemRow'
 import { CompleteForm } from './CompleteForm'
+import { ConfirmPopup } from './ConfirmPopup'
 import { DdayCard } from './DdayCard'
 import { ItemForm } from './ItemForm'
 
@@ -30,6 +31,7 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
   const [adding, setAdding] = useState(false)
   const [completing, setCompleting] = useState<BucketItem | null>(null)
   const [editing, setEditing] = useState<BucketItem | null>(null)
+  const [deleting, setDeleting] = useState<BucketItem | null>(null)
 
   // 체크 → 완료 팝업, 체크 해제 → 바로 완료 취소
   const toggle = (id: string) => {
@@ -99,6 +101,7 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
                     category={category}
                     onToggle={toggle}
                     onEdit={() => setEditing(item)}
+                    onDelete={() => setDeleting(item)}
                     onOpenMemory={() => openMemory(item.id)}
                   />
                 )
@@ -152,6 +155,20 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
           onDelete={() => {
             deleteItem(editing.id)
             setEditing(null)
+          }}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmPopup
+          title="버킷리스트를 지울까요?"
+          message={`'${deleting.title}'${
+            memories.some((d) => d.bucketItemId === deleting.id) ? ' — 남긴 추억(사진·소감)도 같이 지워져요.' : ''
+          }`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => {
+            deleteItem(deleting.id)
+            setDeleting(null)
           }}
         />
       )}

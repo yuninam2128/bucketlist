@@ -2,13 +2,17 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { AddButton } from '../components/AddButton'
 import { CategoryForm } from '../components/CategoryForm'
+import { ConfirmPopup } from '../components/ConfirmPopup'
 import { Folder } from '../components/Folder'
 import { useStore } from '../data/store'
+import type { Category } from '../types'
 import styles from './CategoriesPage.module.css'
 
 export function CategoriesPage() {
-  const { categories, items, diaries, addCategory } = useStore()
+  const { categories, items, diaries, addCategory, updateCategory, deleteCategory } = useStore()
   const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<Category | null>(null)
+  const [deleting, setDeleting] = useState<Category | null>(null)
 
   // 폴더에서 삐져나오는 사진: 그 카테고리 항목을 완료하며 남긴 사진(최신순) + 직접 지정한 표지
   const photosOf = (categoryId: string, coverPhotos: string[]) => {
@@ -35,12 +39,47 @@ export function CategoriesPage() {
                   <p className={styles.count}>총 {count}개의 버켓리스트</p>
                 </div>
               </Link>
+              {/* 폴더 링크 밖에 둬서 누르면 이동 대신 고치기 */}
+              <button
+                type="button"
+                className={`${styles.edit} ${i % 2 ? styles.editReversed : ''}`}
+                onClick={() => setEditing(category)}
+              >
+                수정
+              </button>
             </li>
           )
         })}
       </ul>
 
       <AddButton label="카테고리 추가" className={styles.add} onClick={() => setAdding(true)} />
+
+      {editing && (
+        <CategoryForm
+          category={editing}
+          onCancel={() => setEditing(null)}
+          onSubmit={(input) => {
+            updateCategory(editing.id, input)
+            setEditing(null)
+          }}
+          onDelete={() => {
+            setDeleting(editing)
+            setEditing(null)
+          }}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmPopup
+          title="카테고리를 지울까요?"
+          message={`'${deleting.title}' 안의 버킷리스트와 남긴 추억(사진·소감)이 모두 지워져요.`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => {
+            deleteCategory(deleting.id)
+            setDeleting(null)
+          }}
+        />
+      )}
 
       {adding && (
         <CategoryForm

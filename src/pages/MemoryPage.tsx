@@ -4,6 +4,7 @@ import arrowLeft from '../assets/figma/icon-arrow-left.png'
 import nameEllipse from '../assets/figma/name-ellipse.svg'
 import { AddButton } from '../components/AddButton'
 import { CategoryBadge } from '../components/CategoryBadge'
+import { ConfirmPopup } from '../components/ConfirmPopup'
 import { NoteForm } from '../components/NoteForm'
 import { useStore } from '../data/store'
 import { tapeColor } from '../lib/categoryColors'
@@ -16,8 +17,10 @@ export function MemoryPage() {
   const { memoryId } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { diaries, items, categories, couple, currentUser, saveNote, addPhotos } = useStore()
+  const { diaries, items, categories, couple, currentUser, saveNote, addPhotos, removePhoto } = useStore()
   const [writing, setWriting] = useState(false)
+  /** 지울지 물어보는 중인 사진 번호 */
+  const [removing, setRemoving] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
   const [current, setCurrent] = useState(0)
   const strip = useRef<HTMLUListElement>(null)
@@ -38,6 +41,8 @@ export function MemoryPage() {
   const item = items.find((it) => it.id === entry.bucketItemId)
   const category = item && categories.find((c) => c.id === item.categoryId)
   const mine = entry.notes.find((n) => n.author === currentUser)
+  // 지금 보고 있는 사진 (사진이 줄어들어도 범위 안으로)
+  const shown = Math.max(0, Math.min(current, entry.photos.length - 1))
 
   const onScroll = () => {
     const el = strip.current
@@ -85,7 +90,11 @@ export function MemoryPage() {
             ))}
           </ul>
           <p className={styles.counter}>
-            {Math.min(current, entry.photos.length - 1) + 1} / {entry.photos.length}
+            {shown + 1} / {entry.photos.length}
+            <span aria-hidden> | </span>
+            <button type="button" className={styles.removePhoto} onClick={() => setRemoving(shown)}>
+              이 사진 지우기
+            </button>
           </p>
         </>
       ) : (
@@ -118,6 +127,18 @@ export function MemoryPage() {
           <AddButton label="한마디 추가" className={styles.addNote} onClick={() => setWriting(true)} />
         )}
       </section>
+
+      {removing !== null && (
+        <ConfirmPopup
+          title="이 사진을 지울까요?"
+          message={`${removing + 1}번째 사진이 추억에서 빠져요.`}
+          onCancel={() => setRemoving(null)}
+          onConfirm={() => {
+            removePhoto(entry.id, removing)
+            setRemoving(null)
+          }}
+        />
+      )}
 
       {writing && (
         <NoteForm

@@ -1,0 +1,7 @@
+.message {
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  word-break: keep-all;
+  color: var(--text-muted);
+}

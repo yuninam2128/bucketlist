@@ -190,6 +190,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setItemRows((prev) => prev.map((it) => (it.id === row.id ? row : it)))
   }
 
+  /** 이 항목들로 남긴 추억의 사진·스티커 파일 지우기 */
+  const removeMemoryFiles = async (itemIds: Set<string>) => {
+    const paths = memoryRows
+      .filter((m) => m.item_id && itemIds.has(m.item_id))
+      .flatMap((m) => [...m.photos, ...(m.sticker_path ? [m.sticker_path] : [])])
+    if (paths.length > 0) await supabase.storage.from(PHOTO_BUCKET).remove(paths)
+  }
+
   // ---- 화면용 모양으로 바꾸기 ----
   const authorOf = (id: string | null): Author => (id === userId ? 'me' : 'partner')
 
@@ -341,13 +349,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
 
     deleteItem: async (id) => {
-      // 추억 사진 파일도 같이 정리 (DB의 추억/한마디는 FK cascade로 지워짐)
-      const memories = memoryRows.filter((m) => m.item_id === id)
-      const paths = memories.flatMap((m) => [...m.photos, ...(m.sticker_path ? [m.sticker_path] : [])])
-      if (paths.length > 0) await supabase.storage.from(PHOTO_BUCKET).remove(paths)
+      // 추억/한마디는 FK cascade로 같이 지워지고, 사진 파일은 직접 정리
+      await removeMemoryFiles(new Set([id]))
       must(await supabase.from('bucket_items').delete().eq('id', id))
       setItemRows((prev) => prev.filter((it) => it.id !== id))
       setMemoryRows((prev) => prev.filter((m) => m.item_id !== id))
+    },
+
+    updateCategory: async (id, { title, color }) => {
+      const row = must(
+        await supabase.from('categories').update({ title, color }).eq('id', id).select().single<CategoryRow>(),
+      )
+      setCategoryRows((prev) => prev.map((c) => (c.id === id ? row : c)))
+    },
+
+    deleteCategory: async (id) => {
+      // 버킷리스트 → 추억 → 한마디 까지 FK cascade, 사진 파일은 직접 정리
+      const itemIds = new Set(itemRows.filter((it) => it.category_id === id).map((it) => it.id))
+      await removeMemoryFiles(itemIds)
+      must(await supabase.from('categories').delete().eq('id', id))
+      setCategoryRows((prev) => prev.filter((c) => c.id !== id))
+      setItemRows((prev) => prev.filter((it) => it.category_id !== id))
+      setMemoryRows((prev) => prev.filter((m) => !m.item_id || !itemIds.has(m.item_id)))
+    },
+
+    removePhoto: async (diaryId, index) => {
+      const memory = memoryRows.find((m) => m.id === diaryId)
+      const path = memory?.photos[index]
+      if (!memory || !path) return
+      replaceMemory(
+        must(
+          await supabase
+            .from('memories')
+            .update({ photos: memory.photos.filter((_, i) => i !== index) })
+            .eq('id', diaryId)
+            .select()
+            .single<MemoryRow>(),
+        ),
+      )
+      await supabase.storage.from(PHOTO_BUCKET).remove([path])
     },
 
     updateProfile: async ({ nickname, avatar }) => {

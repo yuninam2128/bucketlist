@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { NewCategory } from '../data/store'
+import type { Category } from '../types'
 import { COLOR_FAMILIES, DEFAULT_CATEGORY_COLOR, familyOf } from '../lib/categoryColors'
 import { CategoryBadge } from './CategoryBadge'
 import styles from './CategoryForm.module.css'
@@ -8,21 +9,25 @@ import { Popup } from './Popup'
 import popup from './Popup.module.css'
 
 interface Props {
+  /** 있으면 고치기 모드 (값 채워서 열고, 삭제 버튼) */
+  category?: Category
   onSubmit: (input: NewCategory) => void
+  onDelete?: () => void
   onCancel: () => void
 }
 
-// 새 카테고리: 이름 + 색 (계열 6개 → 그 계열의 진하기 4단계)
-export function CategoryForm({ onSubmit, onCancel }: Props) {
-  const [title, setTitle] = useState('')
-  const [color, setColor] = useState(DEFAULT_CATEGORY_COLOR)
+// 카테고리 추가/고치기: 이름 + 색 (계열 6개 → 그 계열의 진하기 4단계)
+export function CategoryForm({ category, onSubmit, onDelete, onCancel }: Props) {
+  const [title, setTitle] = useState(category?.title ?? '')
+  const [color, setColor] = useState(category?.color ?? DEFAULT_CATEGORY_COLOR)
   const family = familyOf(color)
 
   const trimmed = title.trim()
 
   return (
     <Popup
-      title="새 카테고리"
+      title={category ? '카테고리 고치기' : '새 카테고리'}
+      submitLabel={category ? '저장' : '추가'}
       canSubmit={!!trimmed}
       onCancel={onCancel}
       onSubmit={() => onSubmit({ title: trimmed, color })}
@@ -35,7 +40,7 @@ export function CategoryForm({ onSubmit, onCancel }: Props) {
           onChange={(e) => setTitle(e.target.value)}
           maxLength={12}
           placeholder="영화 뭐볼까"
-          autoFocus
+          autoFocus={!category}
         />
       </label>
 
@@ -74,6 +79,12 @@ export function CategoryForm({ onSubmit, onCancel }: Props) {
       <div className={styles.preview}>
         <CategoryBadge category={{ id: 'preview', title: trimmed || '미리보기', color, coverPhotos: [] }} />
       </div>
+
+      {onDelete && (
+        <button type="button" className={styles.deleteLink} onClick={onDelete}>
+          이 카테고리 지우기
+        </button>
+      )}
     </Popup>
   )
 }

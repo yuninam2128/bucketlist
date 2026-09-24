@@ -72,6 +72,11 @@ export interface Store {
   /** 기록 없이 완료한 항목에 빈 추억 만들기 → 추억 id */
   startMemory: (itemId: string) => Promise<string>
   addCategory: (input: NewCategory) => Promise<void>
+  updateCategory: (id: string, input: NewCategory) => Promise<void>
+  /** 카테고리 삭제 — 안의 버킷리스트·추억(사진 포함)도 같이 지움 */
+  deleteCategory: (id: string) => Promise<void>
+  /** 추억에서 사진 한 장 빼기 (index = 추억 사진 순서) */
+  removePhoto: (diaryId: string, index: number) => Promise<void>
   addItem: (input: NewItem) => Promise<void>
   updateItem: (id: string, input: NewItem) => Promise<void>
   /** 항목 삭제 — 그 항목으로 남긴 추억(사진 포함)도 같이 지움 */

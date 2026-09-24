@@ -47,3 +47,23 @@
   font-size: 17px;
   white-space: nowrap;
 }
+
+/* "총 n개의 버켓리스트" 바로 아래에 작게. 폴더 링크와 겹치지 않게 li 기준 절대 위치 */
+.list li {
+  position: relative;
+}
+
+.edit {
+  position: absolute;
+  left: 220px;
+  top: 108px;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.editReversed {
+  left: 56px;
+}
