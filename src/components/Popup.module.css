@@ -33,6 +33,8 @@
 .body {
   max-height: calc(var(--screen-h, 100dvh) - 96px);
   overflow-y: auto;
+  /* 안쪽 내용이 넓어져도 팝업 전체가 옆으로 밀리지 않게 */
+  overflow-x: hidden;
   padding: 50px 15px 16px;
 }
 

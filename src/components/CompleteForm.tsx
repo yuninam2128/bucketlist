@@ -8,8 +8,8 @@ import { DateField } from './DateField'
 import { Popup } from './Popup'
 import popup from './Popup.module.css'
 
-// 추억 상세에서 나중에 더 올릴 수도 있음
-const MAX_PHOTOS = 10
+// 완료할 때 한 번에 올리는 최대 장수. 더 필요하면 추억 상세의 "사진 추가"로 (거긴 제한 없음)
+const MAX_PHOTOS = 30
 
 type Photo = LocalPhoto
 
@@ -102,8 +102,21 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       <DateField label="언제" value={date} onChange={setDate} />
 
       <div className={popup.field}>
-        <span className={popup.label}>사진 (선택, 최대 {MAX_PHOTOS}장 · 첫 장이 대표)</span>
+        <span className={popup.label}>
+          사진 (선택 · {photos.length}/{MAX_PHOTOS}장 · 첫 장이 대표)
+        </span>
         <div className={styles.photos}>
+          {/* 사진이 많아져도 바로 누를 수 있게 추가 칸은 맨 앞 */}
+          {photos.length < MAX_PHOTOS && (
+            <button
+              type="button"
+              className={styles.addPhoto}
+              onClick={() => fileInput.current?.click()}
+              disabled={loading}
+            >
+              {loading ? '...' : '+ 사진'}
+            </button>
+          )}
           {photos.map((p, i) => (
             <div key={p.url} className={`${styles.photo} ${i % 2 ? styles.tiltRight : styles.tiltLeft}`}>
               <img src={p.url} alt="" />
@@ -117,16 +130,6 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
               </button>
             </div>
           ))}
-          {photos.length < MAX_PHOTOS && (
-            <button
-              type="button"
-              className={styles.addPhoto}
-              onClick={() => fileInput.current?.click()}
-              disabled={loading}
-            >
-              {loading ? '...' : '+ 사진'}
-            </button>
-          )}
         </div>
         <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={addPhotos} />
         {error && <p className={styles.error}>{error}</p>}
