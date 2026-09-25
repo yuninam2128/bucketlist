@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AppLayout } from './components/AppLayout'
 import { ErrorToast } from './components/ErrorToast'
@@ -36,13 +37,18 @@ function Gate() {
   )
 }
 
-export default function App() {
+interface AppProps {
+  /** 개발용 미리보기에선 가짜 데이터 Provider로 바꿔 끼움 (main.tsx) */
+  Provider?: ComponentType<{ children: ReactNode }>
+}
+
+export default function App({ Provider = StoreProvider }: AppProps) {
   return (
-    <StoreProvider>
+    <Provider>
       <BrowserRouter>
         <Gate />
         <ErrorToast />
       </BrowserRouter>
-    </StoreProvider>
+    </Provider>
   )
 }

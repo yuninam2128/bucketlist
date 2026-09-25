@@ -1,7 +1,7 @@
 /* svg에 그림자 여백이 포함돼 51x51 (원은 43x43, 중심 25.5,21.5) */
 .avatars {
   position: absolute;
-  top: calc(23px + env(safe-area-inset-top, 0px));
+  top: calc(23px + var(--sat, 0px));
   right: 24px;
   width: 72px;
   height: 68px;

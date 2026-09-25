@@ -289,18 +289,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     completeItem: async (id, { date, photos, note, stickerJob }) => {
       await updateItemRow(id, { done: true, date })
-      if (photos.length === 0 && !note) return
-      let memory = await insertMemory(id, date)
+      // 예전에 완료 취소하면서 추억을 남겨뒀으면 새로 만들지 않고 거기에 이어 붙임 (카드 중복 방지)
+      const existing = memoryRows.find((m) => m.item_id === id)
+      if (!existing && photos.length === 0 && !note) return
+      let memory = existing ?? (await insertMemory(id, date))
+      if (existing && existing.date !== date) {
+        memory = must(
+          await supabase.from('memories').update({ date }).eq('id', existing.id).select().single<MemoryRow>(),
+        )
+        replaceMemory(memory)
+      }
       if (note) await upsertMyNote(memory.id, note)
       if (photos.length > 0) {
         memory = await appendPhotos(memory, photos)
         replaceMemory(memory)
       }
-      attachSticker(memory.id, stickerJob)
+      // 이미 스티커가 있으면 그대로 둠
+      if (!memory.sticker_path) attachSticker(memory.id, stickerJob)
     },
 
-    uncompleteItem: async (id) => {
+    uncompleteItem: async (id, { removeMemory = false } = {}) => {
       await updateItemRow(id, { done: false })
+      if (!removeMemory) return
+      // 추억(한마디는 FK cascade) + 사진 파일까지 정리
+      await removeMemoryFiles(new Set([id]))
+      must(await supabase.from('memories').delete().eq('item_id', id))
+      setMemoryRows((prev) => prev.filter((m) => m.item_id !== id))
     },
 
     saveNote: async (diaryId, text) => {

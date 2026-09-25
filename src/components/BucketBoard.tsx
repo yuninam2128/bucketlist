@@ -32,13 +32,16 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
   const [completing, setCompleting] = useState<BucketItem | null>(null)
   const [editing, setEditing] = useState<BucketItem | null>(null)
   const [deleting, setDeleting] = useState<BucketItem | null>(null)
+  const [uncompleting, setUncompleting] = useState<BucketItem | null>(null)
 
   // 체크 → 완료 팝업, 체크 해제 → 바로 완료 취소
   const toggle = (id: string) => {
     const item = items.find((it) => it.id === id)
     if (!item) return
-    if (item.done) uncompleteItem(id)
-    else setCompleting(item)
+    if (!item.done) return setCompleting(item)
+    // 남긴 추억이 있으면 어떻게 할지 물어보고, 없으면 바로 완료 취소
+    if (memories.some((d) => d.bucketItemId === id)) setUncompleting(item)
+    else uncompleteItem(id)
   }
   // 안 한 것 먼저, 완료한 건 아래로
   const list = [...items].sort((a, b) => Number(a.done) - Number(b.done))
@@ -155,6 +158,26 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
           onDelete={() => {
             deleteItem(editing.id)
             setEditing(null)
+          }}
+        />
+      )}
+
+      {uncompleting && (
+        <ConfirmPopup
+          title="완료를 취소할까요?"
+          message={`'${uncompleting.title}'에 남긴 추억(사진·소감)은 어떻게 할까요?`}
+          confirmLabel="추억도 지우기"
+          secondary={{
+            label: '추억은 남겨두기',
+            onClick: () => {
+              uncompleteItem(uncompleting.id)
+              setUncompleting(null)
+            },
+          }}
+          onCancel={() => setUncompleting(null)}
+          onConfirm={() => {
+            uncompleteItem(uncompleting.id, { removeMemory: true })
+            setUncompleting(null)
           }}
         />
       )}

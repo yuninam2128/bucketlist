@@ -5,8 +5,8 @@
   transform: translateX(-50%);
   width: 100%;
   max-width: var(--app-width);
-  height: calc(var(--tabbar-height) + 20px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+  height: calc(var(--tabbar-height) + 20px + var(--sab, 0px));
+  padding-bottom: calc(30px + var(--sab, 0px));
   display: flex;
   align-items: flex-end;
   justify-content: center;
