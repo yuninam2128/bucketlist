@@ -360,6 +360,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     updateItem: async (id, { title, categoryId, date }: NewItem) => {
       await updateItemRow(id, { title, category_id: categoryId, date: date ?? null })
+      // 완료한 항목의 날짜 = 완료일이라, 그 추억(캘린더 카드·스티커)도 같은 날로 옮김
+      const done = itemRows.find((it) => it.id === id)?.done
+      const moved = memoryRows.filter((m) => m.item_id === id && m.date !== date)
+      if (!done || !date || moved.length === 0) return
+      const rows = must(await supabase.from('memories').update({ date }).eq('item_id', id).select()) as MemoryRow[]
+      setMemoryRows((prev) => prev.map((m) => rows.find((r) => r.id === m.id) ?? m))
     },
 
     deleteItem: async (id) => {

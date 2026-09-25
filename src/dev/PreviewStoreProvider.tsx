@@ -100,7 +100,12 @@ export function PreviewStoreProvider({ children }: { children: ReactNode }) {
         prev.map((d) => (d.id === diaryId ? { ...d, photos: d.photos.filter((_, i) => i !== index) } : d)),
       ),
     addItem: async (input) => setItems((prev) => [...prev, { id: tempId(), done: false, author: 'me', ...input }]),
-    updateItem: async (id, input) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...input } : it))),
+    updateItem: async (id, input) => {
+      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...input } : it)))
+      // 완료한 항목이면 추억 날짜도 같이
+      if (items.find((it) => it.id === id)?.done && input.date)
+        setDiaries((prev) => prev.map((d) => (d.bucketItemId === id ? { ...d, date: input.date! } : d)))
+    },
     deleteItem: async (id) => {
       setItems((prev) => prev.filter((it) => it.id !== id))
       setDiaries((prev) => prev.filter((d) => d.bucketItemId !== id))
