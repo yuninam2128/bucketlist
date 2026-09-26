@@ -5,3 +5,13 @@
   word-break: keep-all;
   color: var(--text-muted);
 }
+
+.secondary {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 14px;
+  font-size: 14px;
+  border: 1px solid #000;
+  box-shadow: var(--shadow);
+  background: #fff;
+}

@@ -5,6 +5,7 @@ import styles from './Popup.module.css'
 interface Props {
   title: string
   submitLabel?: string
+  cancelLabel?: string
   canSubmit: boolean
   onSubmit: () => void
   onCancel: () => void
@@ -12,7 +13,15 @@ interface Props {
 }
 
 // Figma 64:579 — 모눈 마스킹테이프로 붙인 종이 팝업. 추가 폼들이 공유
-export function Popup({ title, submitLabel = '추가', canSubmit, onSubmit, onCancel, children }: Props) {
+export function Popup({
+  title,
+  submitLabel = '추가',
+  cancelLabel = '취소',
+  canSubmit,
+  onSubmit,
+  onCancel,
+  children,
+}: Props) {
   const submit = (e: FormEvent) => {
     e.preventDefault()
     if (canSubmit) onSubmit()
@@ -27,7 +36,7 @@ export function Popup({ title, submitLabel = '추가', canSubmit, onSubmit, onCa
           {children}
           <div className={styles.actions}>
             <button type="button" onClick={onCancel}>
-              취소
+              {cancelLabel}
             </button>
             <button type="submit" className={styles.primary} disabled={!canSubmit}>
               {submitLabel}

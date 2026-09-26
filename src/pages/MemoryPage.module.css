@@ -97,6 +97,20 @@
   color: var(--text-muted);
 }
 
+.stickerRow {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.stickerError {
+  display: block;
+  margin-top: 2px;
+  color: #8a0004;
+  word-break: keep-all;
+}
+
 .removePhoto {
   font-size: 12px;
   color: var(--text-muted);
@@ -111,10 +125,11 @@
   color: var(--text-muted);
 }
 
+/* 위의 "스티커 만들기" 글자와 헷갈리지 않게 간격 (테이프 박스 위쪽 투명 여백 ~26px 감안) */
 .addPhoto {
   display: flex;
   justify-content: center;
-  margin: -14px 0 -24px;
+  margin: -4px 0 -24px;
 }
 
 /* 소감 */

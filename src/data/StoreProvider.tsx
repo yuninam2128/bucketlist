@@ -134,21 +134,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // 누끼가 늦게 끝나도 추억에 붙여줌. 실패하면 스티커 없이(점) 표시
   const attachSticker = (memoryId: string, stickerJob?: Promise<Blob>) =>
-    stickerJob
-      ?.then(async (blob) => {
-        const path = await uploadPhoto(memoryId, blob, undefined, 'sticker.png')
-        replaceMemory(
-          must(
-            await supabase
-              .from('memories')
-              .update({ sticker_path: path })
-              .eq('id', memoryId)
-              .select()
-              .single<MemoryRow>(),
-          ),
-        )
-      })
-      .catch(console.error)
+    stickerJob?.then((blob) => saveSticker(memoryId, blob)).catch(console.error)
+
+  // 스티커 파일은 매번 새 이름으로 (같은 이름이면 짝꿍 폰 캐시에 예전 스티커가 남을 수 있음), 예전 파일은 정리
+  const saveSticker = async (memoryId: string, blob: Blob) => {
+    const old = memoryRows.find((m) => m.id === memoryId)?.sticker_path
+    const path = await uploadPhoto(memoryId, blob, undefined, `sticker-${randomName()}.png`)
+    replaceMemory(
+      must(
+        await supabase
+          .from('memories')
+          .update({ sticker_path: path })
+          .eq('id', memoryId)
+          .select()
+          .single<MemoryRow>(),
+      ),
+    )
+    if (old) supabase.storage.from(PHOTO_BUCKET).remove([old])
+  }
 
   const appendPhotos = async (memory: MemoryRow, photos: LocalPhoto[]) => {
     const paths = await Promise.all(photos.map((p) => uploadPhoto(memory.id, p.blob, p.url)))
@@ -289,18 +292,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     completeItem: async (id, { date, photos, note, stickerJob }) => {
       await updateItemRow(id, { done: true, date })
-      if (photos.length === 0 && !note) return
-      let memory = await insertMemory(id, date)
+      // 예전에 완료 취소하면서 추억을 남겨뒀으면 새로 만들지 않고 거기에 이어 붙임 (카드 중복 방지)
+      const existing = memoryRows.find((m) => m.item_id === id)
+      if (!existing && photos.length === 0 && !note) return
+      let memory = existing ?? (await insertMemory(id, date))
+      if (existing && existing.date !== date) {
+        memory = must(
+          await supabase.from('memories').update({ date }).eq('id', existing.id).select().single<MemoryRow>(),
+        )
+        replaceMemory(memory)
+      }
       if (note) await upsertMyNote(memory.id, note)
       if (photos.length > 0) {
         memory = await appendPhotos(memory, photos)
         replaceMemory(memory)
       }
-      attachSticker(memory.id, stickerJob)
+      // 이미 스티커가 있으면 그대로 둠
+      if (!memory.sticker_path) attachSticker(memory.id, stickerJob)
     },
 
-    uncompleteItem: async (id) => {
+    uncompleteItem: async (id, { removeMemory = false } = {}) => {
       await updateItemRow(id, { done: false })
+      if (!removeMemory) return
+      // 추억(한마디는 FK cascade) + 사진 파일까지 정리
+      await removeMemoryFiles(new Set([id]))
+      must(await supabase.from('memories').delete().eq('item_id', id))
+      setMemoryRows((prev) => prev.filter((m) => m.item_id !== id))
     },
 
     saveNote: async (diaryId, text) => {
@@ -316,6 +333,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       replaceMemory(await appendPhotos(memory, photos))
       attachSticker(diaryId, stickerJob)
     },
+
+    setSticker: (diaryId, sticker) => saveSticker(diaryId, sticker),
 
     startMemory: async (itemId) => {
       const item = itemRows.find((it) => it.id === itemId)
@@ -346,6 +365,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     updateItem: async (id, { title, categoryId, date }: NewItem) => {
       await updateItemRow(id, { title, category_id: categoryId, date: date ?? null })
+      // 완료한 항목의 날짜 = 완료일이라, 그 추억(캘린더 카드·스티커)도 같은 날로 옮김
+      const done = itemRows.find((it) => it.id === id)?.done
+      const moved = memoryRows.filter((m) => m.item_id === id && m.date !== date)
+      if (!done || !date || moved.length === 0) return
+      const rows = must(await supabase.from('memories').update({ date }).eq('item_id', id).select()) as MemoryRow[]
+      setMemoryRows((prev) => prev.map((m) => rows.find((r) => r.id === m.id) ?? m))
     },
 
     deleteItem: async (id) => {

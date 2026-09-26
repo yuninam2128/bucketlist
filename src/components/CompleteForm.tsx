@@ -8,8 +8,8 @@ import { DateField } from './DateField'
 import { Popup } from './Popup'
 import popup from './Popup.module.css'
 
-// 추억 상세에서 나중에 더 올릴 수도 있음
-const MAX_PHOTOS = 10
+// 완료할 때 한 번에 올리는 최대 장수. 더 필요하면 추억 상세의 "사진 추가"로 (거긴 제한 없음)
+const MAX_PHOTOS = 30
 
 type Photo = LocalPhoto
 
@@ -33,25 +33,30 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stickerStatus, setStickerStatus] = useState<'idle' | 'working' | 'done' | 'failed'>('idle')
+  const [stickerError, setStickerError] = useState('')
   const sticker = useRef<StickerJob | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
   // 대표 사진(첫 장)이 정해지는 즉시 누끼 시작 — 완료를 누를 때 기다리지 않게
-  const syncSticker = (next: Photo[]) => {
+  const syncSticker = (next: Photo[], force = false) => {
     const first = next[0]
     if (!first) {
       sticker.current = null
       setStickerStatus('idle')
       return
     }
-    if (sticker.current?.photoUrl === first.url) return
+    if (!force && sticker.current?.photoUrl === first.url) return
     const job = stickerJobFor(first.blob)
     const current: StickerJob = { photoUrl: first.url, job }
     sticker.current = current
     setStickerStatus('working')
     job.then(
       () => sticker.current === current && setStickerStatus('done'),
-      () => sticker.current === current && setStickerStatus('failed'),
+      (e) => {
+        if (sticker.current !== current) return
+        setStickerStatus('failed')
+        setStickerError(e instanceof Error ? e.message : '')
+      },
     )
   }
 
@@ -102,8 +107,21 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       <DateField label="언제" value={date} onChange={setDate} />
 
       <div className={popup.field}>
-        <span className={popup.label}>사진 (선택, 최대 {MAX_PHOTOS}장 · 첫 장이 대표)</span>
+        <span className={popup.label}>
+          사진 (선택 · {photos.length}/{MAX_PHOTOS}장 · 첫 장이 대표)
+        </span>
         <div className={styles.photos}>
+          {/* 사진이 많아져도 바로 누를 수 있게 추가 칸은 맨 앞 */}
+          {photos.length < MAX_PHOTOS && (
+            <button
+              type="button"
+              className={styles.addPhoto}
+              onClick={() => fileInput.current?.click()}
+              disabled={loading}
+            >
+              {loading ? '...' : '+ 사진'}
+            </button>
+          )}
           {photos.map((p, i) => (
             <div key={p.url} className={`${styles.photo} ${i % 2 ? styles.tiltRight : styles.tiltLeft}`}>
               <img src={p.url} alt="" />
@@ -117,16 +135,6 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
               </button>
             </div>
           ))}
-          {photos.length < MAX_PHOTOS && (
-            <button
-              type="button"
-              className={styles.addPhoto}
-              onClick={() => fileInput.current?.click()}
-              disabled={loading}
-            >
-              {loading ? '...' : '+ 사진'}
-            </button>
-          )}
         </div>
         <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={addPhotos} />
         {error && <p className={styles.error}>{error}</p>}
@@ -134,7 +142,16 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
           <p className={styles.stickerStatus}>
             {stickerStatus === 'working' && '첫 사진으로 캘린더 스티커 만드는 중… (완료 눌러도 계속 만들어요)'}
             {stickerStatus === 'done' && '캘린더 스티커 준비 완료 ✓'}
-            {stickerStatus === 'failed' && '스티커를 못 만들었어요. 캘린더엔 점으로 표시돼요'}
+            {stickerStatus === 'failed' && (
+              <>
+                스티커를 못 만들었어요. {stickerError}
+                <button type="button" className={styles.retry} onClick={() => syncSticker(photos, true)}>
+                  다시 시도
+                </button>
+                <br />
+                (안 되면 그냥 완료해도 돼요. 나중에 추억에서 다시 만들 수 있어요)
+              </>
+            )}
           </p>
         )}
       </div>

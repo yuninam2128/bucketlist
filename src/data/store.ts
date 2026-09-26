@@ -63,12 +63,14 @@ export interface Store {
 
   /** 완료 처리 + 사진/소감이 있으면 그 날짜의 추억으로 저장 (누끼는 준비되면 자동으로 붙음) */
   completeItem: (id: string, completion: Completion) => Promise<void>
-  /** 완료 취소 (남긴 추억은 유지) */
-  uncompleteItem: (id: string) => Promise<void>
+  /** 완료 취소. removeMemory면 남긴 추억(사진·소감)도 지우고, 아니면 남겨둠 (다시 완료하면 거기에 이어짐) */
+  uncompleteItem: (id: string, options?: { removeMemory?: boolean }) => Promise<void>
   /** 추억에 내 한마디 남기기/수정 (빈 문자열이면 삭제) */
   saveNote: (diaryId: string, text: string) => Promise<void>
   /** 추억에 사진 더하기 (첫 사진이면 누끼 스티커도) */
   addPhotos: (diaryId: string, photos: LocalPhoto[], stickerJob?: Promise<Blob>) => Promise<void>
+  /** 캘린더 스티커를 새로 붙이거나 바꾸기 (누끼 실패 후 다시 시도, 다른 사진으로 바꾸기) */
+  setSticker: (diaryId: string, sticker: Blob) => Promise<void>
   /** 기록 없이 완료한 항목에 빈 추억 만들기 → 추억 id */
   startMemory: (itemId: string) => Promise<string>
   addCategory: (input: NewCategory) => Promise<void>

@@ -1,13 +1,26 @@
+/*
+ * 디자인은 Figma 429px(아이폰 Pro Max) 기준 좌표라,
+ * 더 좁은 폰(갤럭시 360~412px, 아이폰 기본 393px)에선 앱 전체를 비율대로 줄여서 그림.
+ * --app-scale 은 main.tsx 에서 화면 폭으로 계산 (넓으면 1).
+ *
+ * zoom 안에서는 100dvh·safe-area 값도 같이 줄어들기 때문에,
+ * 안쪽에선 아래 변수(--screen-h, --sat, --sab)를 써서 다시 원래 크기로 맞춤.
+ */
 .app {
+  --screen-h: calc(100dvh / var(--app-scale, 1));
+  --sat: calc(env(safe-area-inset-top, 0px) / var(--app-scale, 1));
+  --sab: calc(env(safe-area-inset-bottom, 0px) / var(--app-scale, 1));
+
+  zoom: var(--app-scale, 1);
   position: relative;
   width: 100%;
   max-width: var(--app-width);
-  min-height: 100dvh;
+  min-height: var(--screen-h);
   margin: 0 auto;
   overflow-x: clip;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--sat);
 }
 
 .main {
-  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--tabbar-height) + var(--sab));
 }

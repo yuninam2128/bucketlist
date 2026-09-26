@@ -5,11 +5,27 @@
   color: var(--text-muted);
 }
 
-/* 캘린더 일기 카드처럼 살짝 기울어진 둥근 사진 */
+/* 캘린더 일기 카드처럼 살짝 기울어진 둥근 사진.
+   사진이 많으면 이 줄만 옆으로 넘어감 (팝업 전체가 같이 밀리지 않게 자기 스크롤 영역) */
 .photos {
   display: flex;
   gap: 14px;
-  padding: 4px 4px 0;
+  /* 기울기·그림자·× 버튼이 잘리지 않게 안쪽 여백 */
+  padding: 10px 8px 12px;
+  margin: -6px -8px 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.photos::-webkit-scrollbar {
+  display: none;
+}
+
+.photos > * {
+  scroll-snap-align: start;
 }
 
 .photo,
@@ -69,4 +85,12 @@
   font-size: 14px;
   color: var(--text-muted);
   border: 1px dashed var(--text-muted);
+}
+
+.retry {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }

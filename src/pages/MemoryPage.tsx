@@ -17,7 +17,10 @@ export function MemoryPage() {
   const { memoryId } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { diaries, items, categories, couple, currentUser, saveNote, addPhotos, removePhoto } = useStore()
+  const { diaries, items, categories, couple, currentUser, saveNote, addPhotos, removePhoto, setSticker } = useStore()
+  const [stickerState, setStickerState] = useState<{ status: 'idle' | 'working' | 'done' | 'failed'; message?: string }>(
+    { status: 'idle' },
+  )
   const [writing, setWriting] = useState(false)
   /** 지울지 물어보는 중인 사진 번호 */
   const [removing, setRemoving] = useState<number | null>(null)
@@ -43,6 +46,18 @@ export function MemoryPage() {
   const mine = entry.notes.find((n) => n.author === currentUser)
   // 지금 보고 있는 사진 (사진이 줄어들어도 범위 안으로)
   const shown = Math.max(0, Math.min(current, entry.photos.length - 1))
+
+  const makeStickerFromShown = async () => {
+    setStickerState({ status: 'working' })
+    try {
+      const photo = await (await fetch(entry.photos[shown])).blob()
+      await setSticker(entry.id, await stickerJobFor(photo))
+      setStickerState({ status: 'done' })
+    } catch (e) {
+      console.error(e)
+      setStickerState({ status: 'failed', message: e instanceof Error ? e.message : '' })
+    }
+  }
 
   const onScroll = () => {
     const el = strip.current
@@ -95,6 +110,20 @@ export function MemoryPage() {
             <button type="button" className={styles.removePhoto} onClick={() => setRemoving(shown)}>
               이 사진 지우기
             </button>
+          </p>
+          {/* 누끼가 실패했거나 다른 사진으로 바꾸고 싶을 때 */}
+          <p className={styles.stickerRow}>
+            {stickerState.status === 'working' ? (
+              '스티커 만드는 중… (처음엔 1분 정도 걸릴 수 있어요)'
+            ) : (
+              <button type="button" className={styles.removePhoto} onClick={makeStickerFromShown}>
+                {entry.sticker ? '이 사진으로 캘린더 스티커 바꾸기' : '이 사진으로 캘린더 스티커 만들기'}
+              </button>
+            )}
+            {stickerState.status === 'done' && ' ✓'}
+            {stickerState.status === 'failed' && (
+              <span className={styles.stickerError}>못 만들었어요. {stickerState.message}</span>
+            )}
           </p>
         </>
       ) : (
