@@ -17,7 +17,19 @@ export function MemoryPage() {
   const { memoryId } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { diaries, items, categories, couple, currentUser, saveNote, addPhotos, removePhoto, setSticker } = useStore()
+  const {
+    diaries,
+    items,
+    categories,
+    couple,
+    currentUser,
+    saveNote,
+    addPhotos,
+    removePhoto,
+    setSticker,
+    preUpload,
+    whenUploadsIdle,
+  } = useStore()
   const [stickerState, setStickerState] = useState<{ status: 'idle' | 'working' | 'done' | 'failed'; message?: string }>(
     { status: 'idle' },
   )
@@ -73,9 +85,15 @@ export function MemoryPage() {
     if (files.length === 0) return
     setUploading(true)
     try {
-      const photos = await loadPhotos(files)
-      // 첫 사진이 생기는 순간이면 캘린더 스티커도 만들기
-      const job = entry.photos.length === 0 && !entry.sticker ? stickerJobFor(photos[0].blob) : undefined
+      // 줄이기가 끝난 사진부터 바로 올리기 시작 (완료 팝업과 같은 방식)
+      const photos = await loadPhotos(files, (photo) => {
+        photo.uploaded = preUpload(photo)
+      })
+      // 첫 사진이 생기는 순간이면 캘린더 스티커도 — 업로드가 끝난 뒤에 누끼 시작
+      const job =
+        entry.photos.length === 0 && !entry.sticker
+          ? whenUploadsIdle().then(() => stickerJobFor(photos[0].blob))
+          : undefined
       await addPhotos(entry.id, photos, job)
     } finally {
       setUploading(false)

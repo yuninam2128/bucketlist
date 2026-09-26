@@ -14,7 +14,7 @@ import {
   type ProfileRow,
 } from '../lib/supabase'
 import type { Author, BucketItem, Category, Couple, DiaryEntry } from '../types'
-import { StoreContext, type AuthStatus, type NewItem, type Store } from './store'
+import { StoreContext, type AuthStatus, type NewItem, type SavingState, type Store } from './store'
 
 // 비공개 사진은 서명된 URL로 보여줌 (7일짜리). 발급받은 주소는 폰에 기억해 두고 만료 전까지 재사용 (lib/photoUrlCache)
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7
@@ -46,6 +46,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     urlsRef.current = urls
   }, [urls])
+
+  // ---- 올리는 중 추적: 화면 위 진행 표시 + 앱 닫기 경고 + 누끼는 업로드 끝난 뒤에 ----
+  const [saving, setSaving] = useState<SavingState>({ busy: false, photosDone: 0, photosTotal: 0 })
+  const counts = useRef({ tasks: 0, photosDone: 0, photosTotal: 0 })
+  const idleWaiters = useRef<(() => void)[]>([])
+  const publishSaving = () => {
+    const c = counts.current
+    if (c.tasks === 0) {
+      c.photosDone = 0
+      c.photosTotal = 0
+      idleWaiters.current.splice(0).forEach((resolve) => resolve())
+    }
+    setSaving({ busy: c.tasks > 0, photosDone: c.photosDone, photosTotal: c.photosTotal })
+  }
+  /** 이 작업이 끝날 때까지 저장 중으로 셈 (isPhoto면 사진 n/m에도 셈) */
+  const track = <T,>(work: Promise<T>, isPhoto = false): Promise<T> => {
+    counts.current.tasks++
+    if (isPhoto) counts.current.photosTotal++
+    publishSaving()
+    return work.finally(() => {
+      counts.current.tasks--
+      if (isPhoto) counts.current.photosDone++
+      publishSaving()
+    })
+  }
+
+  // 올리는 중에 새로고침·탭 닫기를 하면 경고 (앱을 완전히 끄는 건 막을 수 없어서 진행 표시로도 안내)
+  useEffect(() => {
+    if (!saving.busy) return
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [saving.busy])
 
   const userId = session?.user.id
   const coupleId = me?.couple_id ?? null
@@ -176,9 +209,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (old) supabase.storage.from(PHOTO_BUCKET).remove([old])
   }
 
+  /** 새 사진 올리기 — 추억이 생기기 전에도 올릴 수 있게 커플 폴더의 uploads/ 에 */
+  const uploadNew = (photo: LocalPhoto) => track(uploadPhoto('uploads', photo.blob, photo.url), true)
+
+  /** 미리 올린 사진은 끝나기만 기다리고, 실패했거나 안 올린 사진은 지금 (다시) 올림. 성공한 것만 추억에 붙임 */
   const appendPhotos = async (memory: MemoryRow, photos: LocalPhoto[]) => {
-    const paths = await Promise.all(photos.map((p) => uploadPhoto(memory.id, p.blob, p.url)))
-    return must(
+    const results = await Promise.allSettled(
+      photos.map((p) => (p.uploaded ?? Promise.reject(new Error('not uploaded'))).catch(() => uploadNew(p))),
+    )
+    const paths = results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+    const row = must(
       await supabase
         .from('memories')
         .update({ photos: [...memory.photos, ...paths] })
@@ -186,6 +226,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .select()
         .single<MemoryRow>(),
     )
+    replaceMemory(row)
+    // 일부라도 실패하면 알림(ErrorToast) — 성공한 사진은 이미 붙어 있음
+    if (paths.length < photos.length) throw new Error(`사진 ${photos.length - paths.length}장을 올리지 못했어요`)
+    return row
   }
 
   const upsertMyNote = async (memoryId: string, text: string) => {
@@ -314,26 +358,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     items,
     diaries,
 
-    completeItem: async (id, { date, photos, note, stickerJob }) => {
-      await updateItemRow(id, { done: true, date })
-      // 예전에 완료 취소하면서 추억을 남겨뒀으면 새로 만들지 않고 거기에 이어 붙임 (카드 중복 방지)
-      const existing = memoryRows.find((m) => m.item_id === id)
-      if (!existing && photos.length === 0 && !note) return
-      let memory = existing ?? (await insertMemory(id, date))
-      if (existing && existing.date !== date) {
-        memory = must(
-          await supabase.from('memories').update({ date }).eq('id', existing.id).select().single<MemoryRow>(),
-        )
-        replaceMemory(memory)
-      }
-      if (note) await upsertMyNote(memory.id, note)
-      if (photos.length > 0) {
-        memory = await appendPhotos(memory, photos)
-        replaceMemory(memory)
-      }
-      // 이미 스티커가 있으면 그대로 둠
-      if (!memory.sticker_path) attachSticker(memory.id, stickerJob)
-    },
+    // 팝업은 바로 닫히고 저장은 뒤에서 — 끝날 때까지 "저장 중"(진행 표시·닫기 경고)
+    completeItem: (id, { date, photos, note, stickerJob }) =>
+      track(
+        (async () => {
+          await updateItemRow(id, { done: true, date })
+          // 예전에 완료 취소하면서 추억을 남겨뒀으면 새로 만들지 않고 거기에 이어 붙임 (카드 중복 방지)
+          const existing = memoryRows.find((m) => m.item_id === id)
+          if (!existing && photos.length === 0 && !note) return
+          let memory = existing ?? (await insertMemory(id, date))
+          if (existing && existing.date !== date) {
+            memory = must(
+              await supabase.from('memories').update({ date }).eq('id', existing.id).select().single<MemoryRow>(),
+            )
+            replaceMemory(memory)
+          }
+          if (note) await upsertMyNote(memory.id, note)
+          // 이미 스티커가 있으면 그대로 둠. 사진 일부가 실패해도 스티커는 붙임
+          const sticker = memory.sticker_path ? undefined : stickerJob
+          try {
+            if (photos.length > 0) memory = await appendPhotos(memory, photos)
+          } finally {
+            attachSticker(memory.id, sticker)
+          }
+        })(),
+      ),
 
     uncompleteItem: async (id, { removeMemory = false } = {}) => {
       await updateItemRow(id, { done: false })
@@ -351,12 +400,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setNoteRows((prev) => prev.filter((n) => !(n.memory_id === diaryId && n.author_id === userId)))
     },
 
-    addPhotos: async (diaryId, photos, stickerJob) => {
-      const memory = memoryRows.find((m) => m.id === diaryId)
-      if (!memory) return
-      replaceMemory(await appendPhotos(memory, photos))
-      attachSticker(diaryId, stickerJob)
+    addPhotos: (diaryId, photos, stickerJob) =>
+      track(
+        (async () => {
+          const memory = memoryRows.find((m) => m.id === diaryId)
+          if (!memory) return
+          try {
+            await appendPhotos(memory, photos)
+          } finally {
+            attachSticker(diaryId, stickerJob)
+          }
+        })(),
+      ),
+
+    preUpload: uploadNew,
+    discardUploads: (paths) => {
+      if (paths.length > 0) supabase.storage.from(PHOTO_BUCKET).remove(paths).catch(console.error)
     },
+    whenUploadsIdle: () =>
+      counts.current.tasks === 0 ? Promise.resolve() : new Promise((resolve) => idleWaiters.current.push(resolve)),
+    saving,
 
     setSticker: (diaryId, sticker) => saveSticker(diaryId, sticker),
 

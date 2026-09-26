@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router'
 import { Avatars } from './Avatars'
 import styles from './AppLayout.module.css'
+import { SavingIndicator } from './SavingIndicator'
 import { TabBar } from './TabBar'
 
 export function AppLayout() {
@@ -11,6 +12,7 @@ export function AppLayout() {
         <Outlet />
       </main>
       <TabBar />
+      <SavingIndicator />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent } from 'react'
-import type { Completion } from '../data/store'
+import { useStore, type Completion } from '../data/store'
 import { toYmd } from '../lib/date'
 import { loadPhotos, stickerJobFor, type LocalPhoto } from '../lib/photos'
 import type { BucketItem } from '../types'
@@ -12,6 +12,7 @@ import popup from './Popup.module.css'
 const MAX_PHOTOS = 30
 
 type Photo = LocalPhoto
+type UploadStatus = 'uploading' | 'done' | 'failed'
 
 interface StickerJob {
   /** 어떤 사진으로 만든 스티커인지 (대표 사진이 바뀌면 새로 만듦) */
@@ -25,10 +26,14 @@ interface Props {
   onCancel: () => void
 }
 
-// 체크하면 뜨는 완료 팝업: 날짜 + (선택) 사진·소감 → 캘린더 기록
+// 체크하면 뜨는 완료 팝업: 날짜 + (선택) 사진·소감 → 캘린더 기록.
+// 사진은 고르는 즉시 뒤에서 올리기 시작 → 소감 쓰는 동안 다 올라가서 완료 누를 땐 거의 안 기다림
 export function CompleteForm({ item, onSubmit, onCancel }: Props) {
+  const { preUpload, discardUploads, whenUploadsIdle } = useStore()
   const [date, setDate] = useState(() => toYmd(new Date()))
   const [photos, setPhotos] = useState<Photo[]>([])
+  const photosRef = useRef<Photo[]>([])
+  const [uploads, setUploads] = useState<Record<string, UploadStatus>>({})
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,7 +42,13 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
   const sticker = useRef<StickerJob | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
-  // 대표 사진(첫 장)이 정해지는 즉시 누끼 시작 — 완료를 누를 때 기다리지 않게
+  const updatePhotos = (next: Photo[]) => {
+    photosRef.current = next
+    setPhotos(next)
+  }
+
+  // 대표 사진(첫 장)이 정해지면 누끼 준비. 모델(56MB) 다운로드가 사진 업로드와 인터넷을 나눠 쓰지 않게
+  // 올리던 사진이 다 올라간 뒤에 시작
   const syncSticker = (next: Photo[], force = false) => {
     const first = next[0]
     if (!first) {
@@ -46,7 +57,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       return
     }
     if (!force && sticker.current?.photoUrl === first.url) return
-    const job = stickerJobFor(first.blob)
+    const job = whenUploadsIdle().then(() => stickerJobFor(first.blob))
     const current: StickerJob = { photoUrl: first.url, job }
     sticker.current = current
     setStickerStatus('working')
@@ -60,6 +71,18 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
     )
   }
 
+  /** 줄이기가 끝난 사진부터 바로 목록에 넣고 업로드 시작 */
+  const startUpload = (photo: Photo) => {
+    if (photosRef.current.length >= MAX_PHOTOS) return URL.revokeObjectURL(photo.url)
+    photo.uploaded = preUpload(photo)
+    setUploads((prev) => ({ ...prev, [photo.url]: 'uploading' }))
+    photo.uploaded.then(
+      () => setUploads((prev) => ({ ...prev, [photo.url]: 'done' })),
+      () => setUploads((prev) => ({ ...prev, [photo.url]: 'failed' })),
+    )
+    updatePhotos([...photosRef.current, photo])
+  }
+
   const addPhotos = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS - photos.length)
     e.target.value = ''
@@ -67,22 +90,31 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
     setLoading(true)
     setError('')
     try {
-      const next = [...photos, ...(await loadPhotos(files))].slice(0, MAX_PHOTOS)
-      setPhotos(next)
-      syncSticker(next)
+      await loadPhotos(files, startUpload)
     } catch {
       setError('사진을 불러오지 못했어요. 다른 사진으로 해볼까요?')
     } finally {
       setLoading(false)
+      syncSticker(photosRef.current)
+    }
+  }
+
+  /** 미리 올린 파일도 같이 정리 */
+  const discard = (list: Photo[]) => {
+    for (const p of list) {
+      URL.revokeObjectURL(p.url)
+      p.uploaded?.then((path) => discardUploads([path])).catch(() => {})
     }
   }
 
   const removePhoto = (url: string) => {
-    URL.revokeObjectURL(url)
+    discard(photos.filter((p) => p.url === url))
     const next = photos.filter((p) => p.url !== url)
-    setPhotos(next)
+    updatePhotos(next)
     syncSticker(next)
   }
+
+  const uploadingCount = photos.filter((p) => uploads[p.url] === 'uploading').length
 
   return (
     <Popup
@@ -90,7 +122,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       submitLabel="완료"
       canSubmit={!!date && !loading}
       onCancel={() => {
-        photos.forEach((p) => URL.revokeObjectURL(p.url))
+        discard(photos)
         onCancel()
       }}
       onSubmit={() =>
@@ -109,6 +141,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
       <div className={popup.field}>
         <span className={popup.label}>
           사진 (선택 · {photos.length}/{MAX_PHOTOS}장 · 첫 장이 대표)
+          {uploadingCount > 0 && ` · ${uploadingCount}장 올리는 중`}
         </span>
         <div className={styles.photos}>
           {/* 사진이 많아져도 바로 누를 수 있게 추가 칸은 맨 앞 */}
@@ -125,6 +158,12 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
           {photos.map((p, i) => (
             <div key={p.url} className={`${styles.photo} ${i % 2 ? styles.tiltRight : styles.tiltLeft}`}>
               <img src={p.url} alt="" />
+              {uploads[p.url] === 'uploading' && <span className={styles.uploading} aria-label="올리는 중" />}
+              {uploads[p.url] === 'failed' && (
+                <span className={styles.failed} title="완료할 때 한 번 더 올려봐요">
+                  !
+                </span>
+              )}
               <button
                 type="button"
                 className={styles.remove}
@@ -140,7 +179,7 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
         {error && <p className={styles.error}>{error}</p>}
         {stickerStatus !== 'idle' && (
           <p className={styles.stickerStatus}>
-            {stickerStatus === 'working' && '첫 사진으로 캘린더 스티커 만드는 중… (완료 눌러도 계속 만들어요)'}
+            {stickerStatus === 'working' && '사진이 다 올라가면 첫 사진으로 캘린더 스티커를 만들어요 (완료 눌러도 계속)'}
             {stickerStatus === 'done' && '캘린더 스티커 준비 완료 ✓'}
             {stickerStatus === 'failed' && (
               <>

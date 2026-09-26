@@ -83,6 +83,18 @@ async function cleanup() {
   await supabase.auth.signOut()
 }
 
+/** 테스트 커플 폴더의 uploads/ 에 있는 파일 수 (미리 올린 사진 확인용) */
+async function countUploads() {
+  const supabase = createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false },
+  })
+  const { data: auth } = await supabase.auth.signInWithPassword({ email: A, password: PASSWORD })
+  const { data: me } = await supabase.from('profiles').select('couple_id').eq('id', auth.user!.id).single()
+  const { data: files } = await supabase.storage.from('photos').list(`${me!.couple_id}/uploads`, { limit: 1000 })
+  await supabase.auth.signOut()
+  return (files ?? []).filter((f) => f.name !== '.emptyFolderPlaceholder').length
+}
+
 test.describe('실제 Supabase (테스트 커플)', () => {
   test.beforeAll(async ({ browser }) => {
     test.setTimeout(120_000)
@@ -104,6 +116,8 @@ test.describe('실제 Supabase (테스트 커플)', () => {
     // 사진 업로드는 팝업이 닫힌 뒤 뒤에서 진행 → 추억 상세에 사진이 붙을 때까지 기다림
     const photo = page.getByRole('img', { name: '사진 1' })
     await expect(photo).toBeVisible({ timeout: 30_000 })
+    // 뒤에서 저장이 끝나면 "사진 올리는 중" 표시가 사라짐
+    await expect(page.getByRole('status')).toHaveCount(0, { timeout: 30_000 })
 
     // 새로고침해도 사진이 서버에서 다시 불러와짐 = 실제로 저장됨 (깨진 이미지면 naturalWidth 0)
     const loaded = () => photo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)
@@ -134,6 +148,25 @@ test.describe('실제 Supabase (테스트 커플)', () => {
     await deleteItem(page, title)
     await goTab(page, '캘린더')
     await expect(page.getByText(note)).toHaveCount(0)
+  })
+
+  test('사진은 고르자마자 올라가고, 완료 안 하고 취소하면 올린 파일도 지워짐', async ({ page }) => {
+    const title = uniqueTitle('E2E 미리올림')
+    await login(page, A)
+    await addItem(page, title)
+    const before = await countUploads()
+
+    await itemRow(page, title).getByRole('button', { name: '완료', exact: true }).click()
+    await page.locator('input[type="file"]').setInputFiles(PHOTO)
+    // 완료를 누르기 전에 이미 업로드가 끝남 (올리는 중 표시가 사라짐)
+    await expect(page.getByRole('button', { name: '사진 빼기' })).toBeVisible()
+    await expect(page.getByLabel('올리는 중')).toHaveCount(0, { timeout: 30_000 })
+    await expect.poll(countUploads, { timeout: 15_000 }).toBe(before + 1)
+
+    // 취소 → 미리 올린 파일 정리
+    await page.locator('form').getByRole('button', { name: '취소', exact: true }).click()
+    await expect.poll(countUploads, { timeout: 15_000 }).toBe(before)
+    await deleteItem(page, title)
   })
 
   test('한쪽이 추가한 항목이 짝꿍 화면에도 보임', async ({ browser }) => {
