@@ -106,9 +106,29 @@ test.describe('실제 Supabase (테스트 커플)', () => {
     await expect(photo).toBeVisible({ timeout: 30_000 })
 
     // 새로고침해도 사진이 서버에서 다시 불러와짐 = 실제로 저장됨 (깨진 이미지면 naturalWidth 0)
+    const loaded = () => photo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)
     await page.reload()
     await expect(photo).toBeVisible()
-    await expect.poll(() => photo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
+    await expect.poll(loaded).toBe(true)
+
+    // 사진 주소 캐시: 한 번 더 새로고침해도 같은 주소 → 브라우저가 이미 받은 사진을 재사용
+    const firstSrc = await photo.getAttribute('src')
+    expect(firstSrc).toContain('/storage/v1/object/sign/')
+    await page.reload()
+    await expect(photo).toBeVisible()
+    expect(await photo.getAttribute('src')).toBe(firstSrc)
+
+    // 안전장치: 기억해 둔 주소가 망가져도(만료 등) 새 주소로 다시 받아서 사진이 뜸
+    await page.evaluate(() => {
+      const key = 'photo-urls:v1'
+      const store = JSON.parse(localStorage.getItem(key) ?? '{}')
+      for (const entry of Object.values(store) as { url: string }[]) entry.url = entry.url.replace(/token=[^&]+/, 'token=broken')
+      localStorage.setItem(key, JSON.stringify(store))
+    })
+    await page.reload()
+    await expect(photo).toBeVisible()
+    await expect.poll(loaded, { timeout: 15_000 }).toBe(true)
+    expect(await photo.getAttribute('src')).not.toContain('token=broken')
 
     await goTab(page, '홈')
     await deleteItem(page, title)

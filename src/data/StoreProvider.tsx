@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toYmd } from '../lib/date'
 import type { LocalPhoto } from '../lib/photos'
+import { clearCachedUrls, forgetUrl, loadCachedUrls, pruneCachedUrls, saveSignedUrls } from '../lib/photoUrlCache'
 import {
   PHOTO_BUCKET,
   supabase,
@@ -15,7 +16,7 @@ import {
 import type { Author, BucketItem, Category, Couple, DiaryEntry } from '../types'
 import { StoreContext, type AuthStatus, type NewItem, type Store } from './store'
 
-// 비공개 사진은 서명된 URL로 보여줌 (7일짜리, 앱을 다시 열면 새로 받음)
+// 비공개 사진은 서명된 URL로 보여줌 (7일짜리). 발급받은 주소는 폰에 기억해 두고 만료 전까지 재사용 (lib/photoUrlCache)
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7
 
 const randomName = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
@@ -39,8 +40,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [itemRows, setItemRows] = useState<ItemRow[]>([])
   const [memoryRows, setMemoryRows] = useState<MemoryRow[]>([])
   const [noteRows, setNoteRows] = useState<NoteRow[]>([])
-  // Storage 경로 → 보여줄 URL
-  const [urls, setUrls] = useState<Record<string, string>>({})
+  // Storage 경로 → 보여줄 URL (지난번에 받아둔 서명 URL로 시작 → 사진이 브라우저 캐시에서 바로 뜸)
+  const [urls, setUrls] = useState<Record<string, string>>(loadCachedUrls)
   const urlsRef = useRef(urls)
   useEffect(() => {
     urlsRef.current = urls
@@ -60,9 +61,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const missing = [...new Set(paths.filter((p): p is string => !!p && !urlsRef.current[p]))]
     if (missing.length === 0) return
     const signed = must(await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(missing, SIGNED_URL_TTL))
-    const next: Record<string, string> = {}
-    for (const s of signed) if (s.path && s.signedUrl) next[s.path] = s.signedUrl
-    setUrls((prev) => ({ ...prev, ...next }))
+    const entries = signed.flatMap((s) => (s.path && s.signedUrl ? [{ path: s.path, url: s.signedUrl }] : []))
+    saveSignedUrls(entries, SIGNED_URL_TTL)
+    setUrls((prev) => ({ ...prev, ...Object.fromEntries(entries.map((e) => [e.path, e.url])) }))
   }, [])
 
   // ---- 우리 커플 데이터 전부 불러오기 (권한 규칙이 알아서 우리 것만 줌) ----
@@ -93,10 +94,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setItemRows(must(items) as ItemRow[])
     setMemoryRows(memoryList)
     setNoteRows(must(notes) as NoteRow[])
-    await signPaths([
-      ...memoryList.flatMap((m) => [...m.photos, m.sticker_path]),
-      ...profileRows.map((p) => p.avatar_path),
-    ])
+    const paths = [...memoryList.flatMap((m) => [...m.photos, m.sticker_path]), ...profileRows.map((p) => p.avatar_path)]
+    await signPaths(paths)
+    pruneCachedUrls(new Set(paths.filter((p): p is string => !!p)))
     setLoaded(true)
   }, [userId, signPaths])
 
@@ -117,13 +117,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [load])
 
+  // 사진이 안 뜨면(주소 만료 등) 그 사진만 새 주소로 다시 받음 — 경로마다 한 번만 시도
+  useEffect(() => {
+    const retried = new Set<string>()
+    const onError = (e: Event) => {
+      const img = e.target
+      if (!(img instanceof HTMLImageElement) || !img.src.includes('/storage/v1/object/sign/')) return
+      const path = Object.keys(urlsRef.current).find((p) => urlsRef.current[p] === img.src)
+      if (!path || retried.has(path)) return
+      retried.add(path)
+      forgetUrl(path)
+      const without = { ...urlsRef.current }
+      delete without[path]
+      // signPaths 가 바로 "없는 주소"로 보고 새로 발급하게 ref도 먼저 갱신
+      urlsRef.current = without
+      setUrls(without)
+      signPaths([path]).catch(console.error)
+    }
+    // img 의 error 이벤트는 버블링되지 않아서 capture 로 받음
+    document.addEventListener('error', onError, true)
+    return () => document.removeEventListener('error', onError, true)
+  }, [signPaths])
+
   // ---- 사진 올리기 ----
   const uploadPhoto = async (folder: string, photo: Blob, preview?: string, name = `${randomName()}.jpg`) => {
     const path = `${coupleId}/${folder}/${name}`
     must(
       await supabase.storage
         .from(PHOTO_BUCKET)
-        .upload(path, photo, { contentType: photo.type || 'image/jpeg', upsert: true }),
+        // 파일 이름이 매번 새로 생겨 내용이 안 바뀌므로 브라우저가 1년 캐시해도 됨 (기본 1시간)
+        .upload(path, photo, { contentType: photo.type || 'image/jpeg', upsert: true, cacheControl: '31536000' }),
     )
     // 방금 올린 건 서명 URL 기다리지 않고 로컬 미리보기로 바로 보여줌
     setUrls((prev) => ({ ...prev, [path]: preview ?? URL.createObjectURL(photo) }))
@@ -274,6 +297,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     signOut: async () => {
       await supabase.auth.signOut()
+      clearCachedUrls()
       setLoaded(false)
       setMe(null)
       setPartner(null)

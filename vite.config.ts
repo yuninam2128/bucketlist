@@ -34,6 +34,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,ico,woff,ttf}'],
         // 누끼용 AI 런타임(onnxruntime)은 스티커 만들 때만 받도록 미리 캐시에서 제외
         globIgnores: ['**/ort*.js', '**/*.wasm'],
+        // 사진은 서비스워커에 따로 저장하지 않음: 다른 도메인(Supabase) 이미지를 그대로 담으면
+        // 크롬이 장당 약 7MB로 계산해서 저장공간이 금방 참. 대신 주소를 고정해(lib/photoUrlCache)
+        // 브라우저 기본 캐시가 재사용하게 함
       },
       devOptions: {
         enabled: !isE2E,
