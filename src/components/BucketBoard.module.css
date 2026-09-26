@@ -14,8 +14,8 @@
   flex: 1;
   min-height: 0;
   width: 346px;
-  /* Figma 2차(45:2): 종이 y 125 */
-  margin: 125px auto 0;
+  /* Figma 3차(45:2): 종이 y 101 (아래 끝은 그대로라 종이가 길어짐) */
+  margin: 101px auto 0;
   border: 1px solid #000;
 }
 

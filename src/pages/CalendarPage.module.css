@@ -4,13 +4,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Figma 2차(53:8): 전체 8px 위로 */
-  padding-top: 161px;
+  /* Figma 3차(53:8): 달력 y 137 */
+  padding-top: 137px;
 }
 
 .ddayCard {
   position: absolute;
-  top: 67px;
+  top: 43px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
