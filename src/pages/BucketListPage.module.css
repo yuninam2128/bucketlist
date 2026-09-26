@@ -19,7 +19,7 @@
 .prev,
 .next {
   position: absolute;
-  top: calc(133px + (100% - 133px) / 2);
+  top: calc(125px + (100% - 125px) / 2);
   z-index: 10;
   transition: transform 0.15s;
 }
