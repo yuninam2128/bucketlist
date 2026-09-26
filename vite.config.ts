@@ -11,6 +11,8 @@ export default defineConfig({
       // pwa-assets.config.ts 기준으로 아이콘 생성 + manifest/head 링크 자동 주입
       pwaAssets: {
         config: true,
+        // 탭 아이콘은 테이프 없는 버전을 쓰려고 head 링크는 index.html 에 직접 적음
+        includeHtmlHeadLinks: false,
       },
       manifest: {
         name: '우리의 버킷리스트',
