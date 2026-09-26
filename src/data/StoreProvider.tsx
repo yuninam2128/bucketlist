@@ -134,21 +134,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // 누끼가 늦게 끝나도 추억에 붙여줌. 실패하면 스티커 없이(점) 표시
   const attachSticker = (memoryId: string, stickerJob?: Promise<Blob>) =>
-    stickerJob
-      ?.then(async (blob) => {
-        const path = await uploadPhoto(memoryId, blob, undefined, 'sticker.png')
-        replaceMemory(
-          must(
-            await supabase
-              .from('memories')
-              .update({ sticker_path: path })
-              .eq('id', memoryId)
-              .select()
-              .single<MemoryRow>(),
-          ),
-        )
-      })
-      .catch(console.error)
+    stickerJob?.then((blob) => saveSticker(memoryId, blob)).catch(console.error)
+
+  // 스티커 파일은 매번 새 이름으로 (같은 이름이면 짝꿍 폰 캐시에 예전 스티커가 남을 수 있음), 예전 파일은 정리
+  const saveSticker = async (memoryId: string, blob: Blob) => {
+    const old = memoryRows.find((m) => m.id === memoryId)?.sticker_path
+    const path = await uploadPhoto(memoryId, blob, undefined, `sticker-${randomName()}.png`)
+    replaceMemory(
+      must(
+        await supabase
+          .from('memories')
+          .update({ sticker_path: path })
+          .eq('id', memoryId)
+          .select()
+          .single<MemoryRow>(),
+      ),
+    )
+    if (old) supabase.storage.from(PHOTO_BUCKET).remove([old])
+  }
 
   const appendPhotos = async (memory: MemoryRow, photos: LocalPhoto[]) => {
     const paths = await Promise.all(photos.map((p) => uploadPhoto(memory.id, p.blob, p.url)))
@@ -330,6 +333,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       replaceMemory(await appendPhotos(memory, photos))
       attachSticker(diaryId, stickerJob)
     },
+
+    setSticker: (diaryId, sticker) => saveSticker(diaryId, sticker),
 
     startMemory: async (itemId) => {
       const item = itemRows.find((it) => it.id === itemId)

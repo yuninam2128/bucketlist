@@ -33,25 +33,30 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stickerStatus, setStickerStatus] = useState<'idle' | 'working' | 'done' | 'failed'>('idle')
+  const [stickerError, setStickerError] = useState('')
   const sticker = useRef<StickerJob | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
   // 대표 사진(첫 장)이 정해지는 즉시 누끼 시작 — 완료를 누를 때 기다리지 않게
-  const syncSticker = (next: Photo[]) => {
+  const syncSticker = (next: Photo[], force = false) => {
     const first = next[0]
     if (!first) {
       sticker.current = null
       setStickerStatus('idle')
       return
     }
-    if (sticker.current?.photoUrl === first.url) return
+    if (!force && sticker.current?.photoUrl === first.url) return
     const job = stickerJobFor(first.blob)
     const current: StickerJob = { photoUrl: first.url, job }
     sticker.current = current
     setStickerStatus('working')
     job.then(
       () => sticker.current === current && setStickerStatus('done'),
-      () => sticker.current === current && setStickerStatus('failed'),
+      (e) => {
+        if (sticker.current !== current) return
+        setStickerStatus('failed')
+        setStickerError(e instanceof Error ? e.message : '')
+      },
     )
   }
 
@@ -137,7 +142,16 @@ export function CompleteForm({ item, onSubmit, onCancel }: Props) {
           <p className={styles.stickerStatus}>
             {stickerStatus === 'working' && '첫 사진으로 캘린더 스티커 만드는 중… (완료 눌러도 계속 만들어요)'}
             {stickerStatus === 'done' && '캘린더 스티커 준비 완료 ✓'}
-            {stickerStatus === 'failed' && '스티커를 못 만들었어요. 캘린더엔 점으로 표시돼요'}
+            {stickerStatus === 'failed' && (
+              <>
+                스티커를 못 만들었어요. {stickerError}
+                <button type="button" className={styles.retry} onClick={() => syncSticker(photos, true)}>
+                  다시 시도
+                </button>
+                <br />
+                (안 되면 그냥 완료해도 돼요. 나중에 추억에서 다시 만들 수 있어요)
+              </>
+            )}
           </p>
         )}
       </div>

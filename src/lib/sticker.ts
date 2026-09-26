@@ -10,11 +10,30 @@ import { compressImage } from './image'
 export async function makeSticker(photo: Blob): Promise<Blob> {
   // 칸이 49px라 작게 넣어도 충분하고, 작을수록 폰에서 빠름
   const small = await compressImage(photo, 512, 0.9)
-  const { removeBackground } = await import('@imgly/background-removal')
-  const cutout = await removeBackground(small, {
-    model: 'isnet_quint8',
-    output: { format: 'image/png' },
-  })
+
+  // 어느 단계에서 실패했는지 화면에 보여주려고 단계별로 메시지를 나눔
+  let removeBackground: typeof import('@imgly/background-removal').removeBackground
+  try {
+    ;({ removeBackground } = await import('@imgly/background-removal'))
+  } catch (e) {
+    throw new Error('누끼 도구를 불러오지 못했어요 (인터넷 연결 확인)', { cause: e })
+  }
+
+  let cutout: Blob
+  try {
+    cutout = await removeBackground(small, {
+      model: 'isnet_quint8',
+      output: { format: 'image/png' },
+    })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    throw new Error(
+      /fetch|network|load/i.test(msg)
+        ? '누끼 모델을 받지 못했어요 (와이파이에서 다시 해보세요)'
+        : '누끼를 따다 멈췄어요 (폰 메모리가 부족했을 수 있어요)',
+      { cause: e },
+    )
+  }
   return cleanAndTrim(cutout)
 }
 
@@ -36,7 +55,13 @@ async function cleanAndTrim(png: Blob, pad = 6): Promise<Blob> {
   const { data } = image
   const alpha = new Uint8Array(width * height)
   for (let i = 0; i < alpha.length; i++) alpha[i] = data[i * 4 + 3]
-  const kept = keepMainBlobs(alpha, width, height)
+  // 피사체가 흐릿하게 잡힌 사진(풍경·음식 등)은 기준을 낮춰 가며 다시 찾아봄
+  const minPixels = width * height * 0.01
+  let kept = new Uint8Array(0)
+  for (const threshold of [176, 112, 64]) {
+    kept = keepMainBlobs(alpha, width, height, threshold)
+    if (countOpaque(kept) >= minPixels) break
+  }
 
   let minX = width
   let minY = height
@@ -52,7 +77,9 @@ async function cleanAndTrim(png: Blob, pad = 6): Promise<Blob> {
     if (y < minY) minY = y
     if (y > maxY) maxY = y
   }
-  if (maxX < 0) throw new Error('사진에서 피사체를 찾지 못했어요')
+  if (maxX < 0 || countOpaque(kept) < minPixels) {
+    throw new Error('사진에서 사람·물건을 찾지 못했어요 (다른 사진으로 해볼까요?)')
+  }
   ctx.putImageData(image, 0, 0)
 
   // 흰 테두리가 잘리지 않게 약간 여유
@@ -106,11 +133,18 @@ function keepMainBlobs(alpha: Uint8Array, width: number, height: number, thresho
     sizes.push(tail)
   }
 
-  const largest = Math.max(0, ...sizes)
+  // 부스러기가 수만 개일 수 있어서 Math.max(...sizes) 대신 (인자 개수 한도 초과 방지)
+  const largest = sizes.reduce((max, s) => (s > max ? s : max), 0)
   const keep = sizes.map((s) => s >= largest * minRatio)
   const out = new Uint8Array(n)
   for (let i = 0; i < n; i++) {
-    if (label[i] >= 0 && keep[label[i]] && alpha[i] >= 96) out[i] = alpha[i]
+    if (label[i] >= 0 && keep[label[i]] && alpha[i] >= Math.min(96, threshold)) out[i] = alpha[i]
   }
   return out
+}
+
+function countOpaque(alpha: Uint8Array): number {
+  let n = 0
+  for (let i = 0; i < alpha.length; i++) if (alpha[i] > 0) n++
+  return n
 }

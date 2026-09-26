@@ -6,6 +6,9 @@
   height: 112px;
   flex-shrink: 0;
   transition: transform 0.15s;
+  /* 박스 위아래 투명 여백은 눌리지 않게 — 보이는 테이프(x 10~157, y 30~80) 부분만 남김.
+     (clip-path는 그림뿐 아니라 터치 영역도 잘라서, 바로 위아래 버튼을 가리지 않음) */
+  clip-path: inset(26px 8px 28px 8px);
 }
 
 .button:active {

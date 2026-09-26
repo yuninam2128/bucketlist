@@ -69,6 +69,8 @@ export interface Store {
   saveNote: (diaryId: string, text: string) => Promise<void>
   /** 추억에 사진 더하기 (첫 사진이면 누끼 스티커도) */
   addPhotos: (diaryId: string, photos: LocalPhoto[], stickerJob?: Promise<Blob>) => Promise<void>
+  /** 캘린더 스티커를 새로 붙이거나 바꾸기 (누끼 실패 후 다시 시도, 다른 사진으로 바꾸기) */
+  setSticker: (diaryId: string, sticker: Blob) => Promise<void>
   /** 기록 없이 완료한 항목에 빈 추억 만들기 → 추억 id */
   startMemory: (itemId: string) => Promise<string>
   addCategory: (input: NewCategory) => Promise<void>

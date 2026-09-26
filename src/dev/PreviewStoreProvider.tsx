@@ -83,6 +83,10 @@ export function PreviewStoreProvider({ children }: { children: ReactNode }) {
       setDiaries((prev) =>
         prev.map((d) => (d.id === diaryId ? { ...d, photos: [...d.photos, ...photos.map((p) => p.url)] } : d)),
       ),
+    setSticker: async (diaryId, sticker) => {
+      const url = URL.createObjectURL(sticker)
+      setDiaries((prev) => prev.map((d) => (d.id === diaryId ? { ...d, sticker: url } : d)))
+    },
     startMemory: async (itemId) => {
       const id = tempId()
       const item = items.find((it) => it.id === itemId)
