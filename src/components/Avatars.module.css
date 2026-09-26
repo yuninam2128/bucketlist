@@ -2,7 +2,8 @@
 .avatars {
   position: absolute;
   top: calc(23px + var(--sat, 0px));
-  right: 24px;
+  /* Figma 2차: 동그라미 x 345 / 366 */
+  right: 16px;
   width: 72px;
   height: 68px;
   z-index: 20;

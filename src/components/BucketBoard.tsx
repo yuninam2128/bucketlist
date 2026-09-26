@@ -93,7 +93,7 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
         </div>
 
         {view === 'list' ? (
-          <ul className={styles.items}>
+          <ul className={`${styles.items} ${styles.listView}`}>
             {list.map((item) => {
               const category = categories.find((c) => c.id === item.categoryId)
               return (
@@ -111,9 +111,6 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
               )
             })}
             {list.length === 0 && <li className={styles.empty}>아직 버킷리스트가 없어요</li>}
-            <li>
-              <AddButton label="버켓리스트 추가" className={styles.add} onClick={() => setAdding(true)} />
-            </li>
           </ul>
         ) : (
           <ul className={`${styles.items} ${styles.album}`}>
@@ -132,6 +129,11 @@ export function BucketBoard({ items, sticky, defaultCategoryId, children }: Prop
               <li className={styles.empty}>버킷리스트를 완료하고 사진을 남기면 여기 모여요</li>
             )}
           </ul>
+        )}
+
+        {/* 목록과 따로, 종이 아래쪽에 고정 (Figma 45:2) */}
+        {view === 'list' && (
+          <AddButton label="버켓리스트 추가" className={styles.add} onClick={() => setAdding(true)} />
         )}
       </section>
       {children}

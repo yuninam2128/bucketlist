@@ -14,7 +14,8 @@
   flex: 1;
   min-height: 0;
   width: 346px;
-  margin: 133px auto 0;
+  /* Figma 2차(45:2): 종이 y 125 */
+  margin: 125px auto 0;
   border: 1px solid #000;
 }
 
@@ -30,7 +31,7 @@
 .sticky {
   position: absolute;
   left: 258px;
-  top: -25px;
+  top: -17px;
   width: 69px;
   height: 118px;
   padding: 9px 0 0 8px;
@@ -130,7 +131,7 @@
 /* 항목 목록: 종이 안에서 스크롤 */
 .items {
   position: absolute;
-  inset: 123px 0 0;
+  inset: 124px 0 0;
   margin: 0;
   padding: 0 0 16px 26px;
   list-style: none;
@@ -138,9 +139,20 @@
   overscroll-behavior: contain;
 }
 
-/* 항목 줄(281px) 가운데. 테이프 위아래 여백만큼 당겨 붙임 */
-.add {
-  margin: -24px 0 -20px 56px;
+/* Figma 2차(45:2): 목록과 같이 스크롤되지 않고 종이 아래쪽에 고정.
+   컴포넌트(169x112) 위치 x 127 / y 742 → 종이 기준 left 85, 종이 아래로 51px 삐져나옴.
+   테이프가 탭바 그라데이션에 흐려지지 않게 탭바(z 30)보다 위 */
+/* 리스트 보기: 목록 스크롤 영역을 테이프 위에서 끝냄 → 항목이 테이프 밑으로 지나가며 가려지지 않음.
+   (테이프는 종이 아래 테두리에서 위로 약 31px 올라와 있어서 여유 포함 44px) */
+.listView {
+  bottom: 44px;
+}
+
+.paper .add {
+  position: absolute;
+  left: 85px;
+  bottom: -51px;
+  z-index: 31;
 }
 
 .empty {
