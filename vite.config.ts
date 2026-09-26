@@ -2,8 +2,13 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// E2E 테스트(playwright.config.ts)가 띄우는 서버: 켜져 있는 dev 서버와 의존성 캐시가 겹치지 않게 따로 쓰고,
+// 개발용 서비스워커(예전 화면을 붙잡음)는 끔
+const isE2E = !!process.env.E2E
+
 // https://vite.dev/config/
 export default defineConfig({
+  cacheDir: isE2E ? 'node_modules/.vite-e2e' : 'node_modules/.vite',
   plugins: [
     react(),
     VitePWA({
@@ -31,7 +36,7 @@ export default defineConfig({
         globIgnores: ['**/ort*.js', '**/*.wasm'],
       },
       devOptions: {
-        enabled: true,
+        enabled: !isE2E,
       },
     }),
   ],
