@@ -1,8 +1,8 @@
 .list {
   list-style: none;
   margin: 0;
-  /* Figma 2차(58:401): 전체 48px 위로 */
-  padding: 77px 0 0;
+  /* Figma 3차(58:401): 폴더 목록 y 45 */
+  padding: 45px 0 0;
   display: flex;
   flex-direction: column;
   gap: 19px;
