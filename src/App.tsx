@@ -2,6 +2,8 @@ import type { ComponentType, ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AppLayout } from './components/AppLayout'
 import { ErrorToast } from './components/ErrorToast'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { CACHE_MAX_AGE, CACHE_VERSION, markRestored, persister, queryClient } from './data/queryClient'
 import { useStore } from './data/store'
 import { StoreProvider } from './data/StoreProvider'
 import { BucketListPage } from './pages/BucketListPage'
@@ -44,11 +46,19 @@ interface AppProps {
 
 export default function App({ Provider = StoreProvider }: AppProps) {
   return (
-    <Provider>
-      <BrowserRouter>
-        <Gate />
-        <ErrorToast />
-      </BrowserRouter>
-    </Provider>
+    // 서버 데이터 캐시를 폰에 저장·복원 (data/queryClient.ts)
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, maxAge: CACHE_MAX_AGE, buster: CACHE_VERSION }}
+      onSuccess={markRestored}
+      onError={markRestored}
+    >
+      <Provider>
+        <BrowserRouter>
+          <Gate />
+          <ErrorToast />
+        </BrowserRouter>
+      </Provider>
+    </PersistQueryClientProvider>
   )
 }

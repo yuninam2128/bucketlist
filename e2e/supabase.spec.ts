@@ -181,9 +181,13 @@ test.describe('실제 Supabase (테스트 커플)', () => {
     await deleteItem(b, title)
 
     // A 쪽도 새로 불러오면 사라져 있음
-    await a.reload()
-    await expect(a.getByText('버켓리스트 추가')).toBeVisible()
-    await expect(itemRow(a, title)).toHaveCount(0)
+    // (B 화면은 낙관적 업데이트로 즉시 지워지고 서버 저장은 뒤에서 끝남 → 서버 반영될 때까지 새로고침 반복)
+    // (폰 캐시에 남아 있던 항목이 먼저 보였다가 새로 받아오면서 사라짐)
+    await expect(async () => {
+      await a.reload()
+      await expect(a.getByText('버켓리스트 추가')).toBeVisible()
+      await expect(itemRow(a, title)).toHaveCount(0, { timeout: 5_000 })
+    }).toPass({ timeout: 20_000 })
     await a.context().close()
     await b.context().close()
   })
