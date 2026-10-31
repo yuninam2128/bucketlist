@@ -83,6 +83,11 @@ export function PreviewStoreProvider({ children }: { children: ReactNode }) {
       setDiaries((prev) =>
         prev.map((d) => (d.id === diaryId ? { ...d, photos: [...d.photos, ...photos.map((p) => p.url)] } : d)),
       ),
+    // 미리보기는 서버가 없으니 "올린 경로" = 미리보기 URL
+    preUpload: async (photo) => photo.url,
+    discardUploads: () => {},
+    whenUploadsIdle: async () => {},
+    saving: { busy: false, photosDone: 0, photosTotal: 0 },
     setSticker: async (diaryId, sticker) => {
       const url = URL.createObjectURL(sticker)
       setDiaries((prev) => prev.map((d) => (d.id === diaryId ? { ...d, sticker: url } : d)))

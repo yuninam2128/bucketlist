@@ -13,6 +13,14 @@ export interface NewItem {
   date?: string
 }
 
+/** 올리는 중 상태 — 화면 위 진행 표시와 "앱 닫지 마세요" 경고에 씀 */
+export interface SavingState {
+  /** 사진 업로드나 저장이 하나라도 진행 중 */
+  busy: boolean
+  photosDone: number
+  photosTotal: number
+}
+
 export interface Completion {
   /** 완료한 날 (YYYY-MM-DD) */
   date: string
@@ -69,6 +77,15 @@ export interface Store {
   saveNote: (diaryId: string, text: string) => Promise<void>
   /** 추억에 사진 더하기 (첫 사진이면 누끼 스티커도) */
   addPhotos: (diaryId: string, photos: LocalPhoto[], stickerJob?: Promise<Blob>) => Promise<void>
+
+  // ---- 사진 미리 올리기 (고르자마자 뒤에서 업로드 → 완료 누를 땐 거의 안 기다림) ----
+  /** 바로 업로드 시작 → Storage 경로 */
+  preUpload: (photo: LocalPhoto) => Promise<string>
+  /** 미리 올렸는데 안 쓰게 된 사진 지우기 (팝업 취소, 사진 빼기) */
+  discardUploads: (paths: string[]) => void
+  /** 진행 중인 업로드가 다 끝나면 — 누끼 모델(56MB) 다운로드가 업로드와 인터넷을 나눠 쓰지 않게 */
+  whenUploadsIdle: () => Promise<void>
+  saving: SavingState
   /** 캘린더 스티커를 새로 붙이거나 바꾸기 (누끼 실패 후 다시 시도, 다른 사진으로 바꾸기) */
   setSticker: (diaryId: string, sticker: Blob) => Promise<void>
   /** 기록 없이 완료한 항목에 빈 추억 만들기 → 추억 id */

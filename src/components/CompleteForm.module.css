@@ -87,6 +87,42 @@
   border: 1px dashed var(--text-muted);
 }
 
+/* 사진 위 업로드 상태: 올리는 중(빙글) / 실패(!) — 실패해도 완료할 때 한 번 더 올려봄 */
+.uploading,
+.failed {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.uploading::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px solid var(--text-muted);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.failed {
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+  color: #8a0004;
+}
+
 .retry {
   margin-left: 6px;
   font-size: 11px;
